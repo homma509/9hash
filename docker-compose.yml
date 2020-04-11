@@ -1,0 +1,16 @@
+version: '3'
+services:
+  go-test:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile_go
+    volumes:
+      - .:/go/src/github.com/homma509/9cc/:cached
+    security_opt:
+      - seccomp:unconfined
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge

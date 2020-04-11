@@ -1,0 +1,10 @@
+FROM golang:1.14.2-alpine
+
+RUN apk add --no-cache git bash make curl gcc libc-dev openssl && \
+    go get -u golang.org/x/lint/golint && \
+    go get -u github.com/kyoh86/richgo && \
+    go get -u golang.org/x/tools/cmd/goimports && \
+    go get -u github.com/derekparker/delve/cmd/dlv
+
+WORKDIR /go/src/github.com/homma509/9hash
+COPY . /go/src/github.com/homma509/9hash
