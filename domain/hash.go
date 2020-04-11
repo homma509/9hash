@@ -1,6 +1,6 @@
 package domain
 
-// HashModel  Haasのモデル
+// HashModel Haasのモデル
 type HashModel struct {
 	Key   string
 	Value string
