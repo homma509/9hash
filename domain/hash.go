@@ -2,6 +2,7 @@ package domain
 
 // HashModel Haasのモデル
 type HashModel struct {
+	ID    uint64
 	Key   string
 	Value string
 }
@@ -16,7 +17,10 @@ func NewHashModel(key, value string) *HashModel {
 
 // HashRepository Hashモデルのリポジトリ
 type HashRepository interface {
-	CreateHash(h *HashModel) (*HashModel, error)
-	DeleteHash(id uint64) error
+	GetHashs() ([]*HashModel, error)
+	GetHashByID(id uint64) (*HashModel, error)
 	GetHashByKey(key string) (*HashModel, error)
+	CreateHash(h *HashModel) (*HashModel, error)
+	UpdateHash(h *HashModel) (*HashModel, error)
+	DeleteHash(h *HashModel) error
 }

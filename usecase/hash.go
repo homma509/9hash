@@ -25,6 +25,10 @@ type CreateHashResponse struct {
 	Hash *domain.HashModel
 }
 
+func (h *CreateHashResponse) HashID() string {
+	return h.Hash.ID
+}
+
 func hashKey() string {
 	key := shortid.MustGenerate()
 	for key == "shorten" {
