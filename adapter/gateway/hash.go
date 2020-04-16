@@ -5,21 +5,22 @@ import (
 	"time"
 
 	"github.com/guregu/dynamo"
+	"github.com/homma509/9hash/adapter/gateway/db"
 	"github.com/homma509/9hash/domain"
 	"github.com/pkg/errors"
 )
 
 // HashResource DynamoDb上のデータ構造を表した構造体
 type HashResource struct {
-	DynamoResourceSchema
-	DynamoResourceBase
+	db.DynamoResourceSchema
+	db.DynamoResourceBase
 	domain.HashModel
-	Mapper *DynamoModelMapper `dynamo:"-"`
+	Mapper *db.DynamoModelMapper `dynamo:"-"`
 }
 
-func NewHashResource(h *domain.HashModel, m *DynamoModelMapper) *HashResource {
+func NewHashResource(h *domain.HashModel, m *db.DynamoModelMapper) *HashResource {
 	return &HashResource{
-		HashModel: h,
+		HashModel: *h,
 		Mapper:    m,
 	}
 }
@@ -52,7 +53,7 @@ func (h *HashResource) SetID(id uint64) {
 	h.HashModel.ID = id
 }
 
-func (h *HashResource) Version() uin64 {
+func (h *HashResource) Version() uint64 {
 	return h.DynamoResourceBase.Version
 }
 
@@ -72,14 +73,14 @@ func (h *HashResource) UpdatedAt() time.Time {
 	return h.DynamoResourceBase.UpdatedAt
 }
 
-func (h *HashResource) SetUpdatedAt() time.Time {
+func (h *HashResource) SetUpdatedAt(t time.Time) {
 	h.DynamoResourceBase.UpdatedAt = t
 }
 
 // HashOperator Hashを操作する構造体
 type HashOperator struct {
-	Client *ResourceTableOperator
-	Mapper *DynamoModelMapper
+	Client *db.ResourceTableOperator
+	Mapper *db.DynamoModelMapper
 }
 
 func (h *HashOperator) getUserResourceByID(id uint64) (*HashResource, error) {
@@ -102,7 +103,7 @@ func (h *HashOperator) GetHashByID(id uint64) (*domain.HashModel, error) {
 	return &r.HashModel, nil
 }
 
-func (h *HashOperator) GetHashByKey(kkey string) (*domain.HashModel, error) {
+func (h *HashOperator) GetHashByKey(key string) (*domain.HashModel, error) {
 	table, err := h.Client.ConnectTable()
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -111,7 +112,7 @@ func (h *HashOperator) GetHashByKey(kkey string) (*domain.HashModel, error) {
 	var hashs []HashResource
 	err = table.Scan().
 		Filter("Key", dynamo.Equal, key).
-		Filter(fmt.Sprintf("begins_with('%s', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{}))),
+		Filter(fmt.Sprintf("begins_with('%s', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{}))).
 		All(&hashs)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -132,7 +133,7 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 
 	var hashResources []HashResource
 	err = table.Scan().
-		Filter(fmt.Sprintf("begins_with('%s', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{}))),
+		Filter(fmt.Sprintf("begins_with('%s', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{}))).
 		All(&hashResources)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -160,13 +161,13 @@ func (h *HashOperator) CreateHash(m *domain.HashModel) (*domain.HashModel, error
 func (h *HashOperator) UpdateHash(m *domain.HashModel) (*domain.HashModel, error) {
 	r, err := h.getUserResourceByID(m.ID)
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	r.Key = m.Key
 	r.Value = m.Value
 
-	err := h.Mapper.PutResource(r)
+	err = h.Mapper.PutResource(r)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -179,7 +180,7 @@ func (h *HashOperator) DeleteHash(m *domain.HashModel) error {
 
 	err := h.Mapper.DeleteResource(r)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return errors.WithStack(err)
 	}
 
 	return nil

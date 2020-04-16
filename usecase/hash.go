@@ -25,7 +25,7 @@ type CreateHashResponse struct {
 	Hash *domain.HashModel
 }
 
-func (h *CreateHashResponse) HashID() string {
+func (h *CreateHashResponse) HashID() uint64 {
 	return h.Hash.ID
 }
 

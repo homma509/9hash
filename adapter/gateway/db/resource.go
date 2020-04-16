@@ -8,7 +8,7 @@ type DynamoResourceTime struct {
 }
 
 type DynamoResourceBase struct {
-	Version int `dynamo:"Version"`
+	Version uint64 `dynamo:"Version"`
 	DynamoResourceTime
 }
 

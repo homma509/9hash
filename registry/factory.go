@@ -45,7 +45,7 @@ func (f *Factory) container(key string, builder func() interface{}) interface{} 
 func (f *Factory) BuildDynamoClient() *db.DynamoClient {
 	return f.container("DynamoClient", func() interface{} {
 		config := &aws.Config{
-			Region: f.Envs.RegionName(),
+			Region: aws.String(f.Envs.RegionName()),
 		}
 		if f.Envs.DynamoLocalEndpoint() != "" {
 			config.Credentials = credentials.NewStaticCredentials("dummy_id", "dummy_secret", "dymmy_token")
@@ -67,7 +67,7 @@ func (f *Factory) BuildResourceTableOperator() *db.ResourceTableOperator {
 func (f *Factory) BuildDynamoModelMapper() *db.DynamoModelMapper {
 	return f.container("DynamoModelMapper", func() interface{} {
 		return &db.DynamoModelMapper{
-			Client:    f.BuildDynamoClient(),
+			Client:    f.BuildResourceTableOperator(),
 			TableName: f.Envs.DynamoTableName(),
 			PKName:    f.Envs.DynamoPKName(),
 			SKName:    f.Envs.DynamoSKName(),
@@ -87,7 +87,6 @@ func (f *Factory) BuildHashOperator() domain.HashRepository {
 func (f *Factory) BuildCreateHash() usecase.ICreateHash {
 	return f.container("CreateHash", func() interface{} {
 		return interactor.NewHashCreator(
-			f.BuildHashOperator()
-		)
+			f.BuildHashOperator())
 	}).(usecase.ICreateHash)
 }

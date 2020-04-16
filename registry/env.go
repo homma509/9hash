@@ -27,7 +27,7 @@ func (e *Envs) DynamoLocalEndpoint() string {
 }
 
 func (e *Envs) DynamoTableName() string {
-	return f.env("DYNAMO_TABLE_NAME")
+	return e.env("DYNAMO_TABLE_NAME")
 }
 
 func (e *Envs) DynamoPKName() string {

@@ -5,7 +5,7 @@ services:
       context: ./
       dockerfile: ./Dockerfile_go
     volumes:
-      - .:/go/src/github.com/homma509/9cc/:cached
+      - .:/go/src/github.com/homma509/9hash/:cached
     security_opt:
       - seccomp:unconfined
     networks:

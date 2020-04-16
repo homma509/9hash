@@ -6,3 +6,6 @@ build:
 
 go-lint:
 	$(DOCKER) run go-test ./scripts/go-lint.sh
+
+go-build:
+	$(DOCKER) run go-test ./scripts/go-build.sh
