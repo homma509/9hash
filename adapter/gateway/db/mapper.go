@@ -88,6 +88,7 @@ func (d *DynamoModelMapper) buildQueryCreate(r DynamoResource) (*dynamo.Put, err
 	r.SetSK()
 
 	query := table.Put(r).If("attribute_not_exists(ID)")
+	// query := table.Put(r).If("attribute_not_exists(ID)")
 
 	return query, nil
 }

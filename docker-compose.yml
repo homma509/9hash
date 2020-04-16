@@ -1,13 +1,44 @@
 version: '3'
 services:
-  go-test:
+  go:
     build:
       context: ./
       dockerfile: ./Dockerfile_go
     volumes:
       - .:/go/src/github.com/homma509/9hash/:cached
+    depends_on: 
+      - dynamodb
     security_opt:
       - seccomp:unconfined
+    env_file: 
+      - .env
+      - .env.dynamodb-local
+    networks:
+      - net
+
+  sls:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile_sls
+    volumes: 
+      - .:/opt/app
+    env_file: 
+      - .env
+      - .env.aws-credentials
+    networks:
+      - net
+
+  dynamodb:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile_dynamodb
+    ports: 
+      - '8000:8000'
+    volumes: 
+      - .:/var/opt
+    env_file: 
+      - .env
+      - .env.dynamodb-local
     networks:
       - net
 
