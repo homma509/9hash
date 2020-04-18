@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -78,7 +79,10 @@ func (d *DynamoModelMapper) buildQueryCreate(r DynamoResource) (*dynamo.Put, err
 		return nil, errors.WithStack(err)
 	}
 
-	id, err := d.generateID()
+	id, err := d.generateID(r.EntityName())
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
 
 	r.SetCreatedAt(time.Now())
 	r.SetUpdatedAt(time.Now())
@@ -88,7 +92,6 @@ func (d *DynamoModelMapper) buildQueryCreate(r DynamoResource) (*dynamo.Put, err
 	r.SetSK()
 
 	query := table.Put(r).If("attribute_not_exists(ID)")
-	// query := table.Put(r).If("attribute_not_exists(ID)")
 
 	return query, nil
 }
@@ -168,8 +171,8 @@ func (d *DynamoModelMapper) isNewEntity(r DynamoResource) bool {
 	return r.Version() == 0
 }
 
-func (d *DynamoModelMapper) generateID() (uint64, error) {
-	attr, err := d.atomicCount(fmt.Sprintf("AtomicCounter-%s", d.TableName), "AtomicCounter", "CurrentNumber", 1)
+func (d *DynamoModelMapper) generateID(tableName string) (uint64, error) {
+	attr, err := d.atomicCount(fmt.Sprintf("AtomicCounter-%s", tableName), "AtomicCounter", "CurrentNumber", 1)
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
@@ -183,11 +186,13 @@ func (d *DynamoModelMapper) generateID() (uint64, error) {
 	return n, nil
 }
 
-func (d *DynamoModelMapper) atomicCount(pk, sk, counterName string, value int) (*dynamodb.AttributeValue, error) {
+func (d *DynamoModelMapper) atomicCount(pk, sk, counterName string, value uint64) (*dynamodb.AttributeValue, error) {
 	db, err := d.Client.ConnectDB()
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	log.Printf("テーブル名：%s", d.TableName)
 
 	// TODO dynamo.DBを使って簡易化する
 	output, err := db.Client().UpdateItem(&dynamodb.UpdateItemInput{

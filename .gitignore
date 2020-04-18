@@ -1,3 +1,4 @@
 .env.aws-credentials
 .serverless*
 bin
+node_modules

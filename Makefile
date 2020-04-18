@@ -13,10 +13,10 @@ go-lint:
 go-build:
 	$(DOCKER) run go ./scripts/go-build.sh
 
-sls-sample:
+sample:
 	$(DOCKER) run sls sls create --template aws-go --name serverless-sample --path ./serverless_sample
 
-sls-package:
+package:
 	$(DOCKER) run sls sls package
 
 deploy:

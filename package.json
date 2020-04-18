@@ -1,0 +1,10 @@
+{
+  "name": "9hash",
+  "description": "",
+  "license": "MIT",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-dotenv-plugin": "^2.3.2"
+  }
+}
