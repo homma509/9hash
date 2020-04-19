@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/guregu/dynamo"
@@ -130,6 +131,7 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	log.Print("取得開始")
 
 	var hashResources []HashResource
 	err = table.Scan().
@@ -138,11 +140,13 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+	log.Printf("取得件数：%d", len(hashResources))
 
-	var hashs = make([]*domain.HashModel, len(hashResources))
-	for i := range hashResources {
-		hashs[i] = &hashResources[i].HashModel
-	}
+	var hashs = make([]*domain.HashModel, 1)
+	// for i := range hashResources {
+	// 	hashs[i] = &hashResources[i].HashModel
+	// }
+	hashs[0] = &hashResources[0].HashModel
 
 	return hashs, nil
 }
@@ -161,6 +165,9 @@ func (h *HashOperator) CreateHash(m *domain.HashModel) (*domain.HashModel, error
 func (h *HashOperator) UpdateHash(m *domain.HashModel) (*domain.HashModel, error) {
 	r, err := h.getUserResourceByID(m.ID)
 	if err != nil {
+		if err.Error() == dynamo.ErrNotFound.Error() {
+			return nil, errors.WithStack(domain.ErrNotFound)
+		}
 		return nil, errors.WithStack(err)
 	}
 

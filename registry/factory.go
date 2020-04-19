@@ -84,6 +84,20 @@ func (f *Factory) BuildHashOperator() domain.HashRepository {
 	}).(domain.HashRepository)
 }
 
+func (f *Factory) BuildGetHash() usecase.IGetHash {
+	return f.container("GetHash", func() interface{} {
+		return interactor.NewHashGetter(
+			f.BuildHashOperator())
+	}).(usecase.IGetHash)
+}
+
+func (f *Factory) BuildGetHashs() usecase.IGetHashs {
+	return f.container("GetHashs", func() interface{} {
+		return interactor.NewHashsGetter(
+			f.BuildHashOperator())
+	}).(usecase.IGetHashs)
+}
+
 func (f *Factory) BuildCreateHash() usecase.ICreateHash {
 	return f.container("CreateHash", func() interface{} {
 		return interactor.NewHashCreator(

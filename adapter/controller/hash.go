@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/homma509/9hash/domain"
 	"github.com/homma509/9hash/registry"
 	"github.com/homma509/9hash/usecase"
 )
@@ -23,6 +24,43 @@ type RequestPostHash struct {
 type HashResponse struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+// GetHash Hashの取得
+func GetHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	// パスパラメータからHashIDを取得する
+	id, err := strconv.ParseUint(req.PathParameters["hash_id"], 10, 64)
+	if err != nil {
+		return Response500(err)
+	}
+
+	// 取得処理
+	getter := registry.GetFactory().BuildGetHash()
+	res, err := getter.Execute(&usecase.GetHashRequest{
+		ID: id,
+	})
+	if err != nil {
+		if err.Error() == domain.ErrNotFound.Error() {
+			return Response404()
+		}
+		return Response500(err)
+	}
+
+	// 200レスポンス
+	return Response200(res)
+}
+
+// GetHashs Hashsの取得
+func GetHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	// 取得処理
+	getter := registry.GetFactory().BuildGetHashs()
+	res, err := getter.Execute(&usecase.GetHashsRequest{})
+	if err != nil {
+		return Response500(err)
+	}
+
+	// 200レスポンス
+	return Response200(res.Hashs[0])
 }
 
 // PostHashs Hashの新規作成
@@ -50,7 +88,7 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 	}
 
 	// 201レスポンス
-	return Response201(res)
+	return Response201(res.Hash)
 }
 
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
@@ -80,8 +118,11 @@ func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 		Value: h.Value,
 	})
 	if err != nil {
+		if err.Error() == domain.ErrNotFound.Error() {
+			return Response404()
+		}
 		return Response500(err)
 	}
 
-	return Response200(res)
+	return Response200(res.Hash)
 }

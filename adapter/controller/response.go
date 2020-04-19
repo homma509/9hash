@@ -68,6 +68,15 @@ func Response400(errs map[string]error) events.APIGatewayProxyResponse {
 	}
 }
 
+// Response404 404レスポンス
+func Response404() events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 404,
+		Headers:    headers(),
+		Body:       `{"message":"結果が見つかりません。"}`,
+	}
+}
+
 // Response500 500レスポンス
 func Response500(err error) events.APIGatewayProxyResponse {
 	glog.Errorf("%+v", err)

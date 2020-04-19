@@ -5,6 +5,35 @@ import (
 	"github.com/teris-io/shortid"
 )
 
+// IGetHash Hash取得UseCase
+type IGetHash interface {
+	Execute(req *GetHashRequest) (*GetHashResponse, error)
+}
+
+// GetHashRequest Hash取得Request
+type GetHashRequest struct {
+	ID uint64
+}
+
+// GetHashResponse Hash取得Response
+type GetHashResponse struct {
+	Hash *domain.HashModel
+}
+
+// IGetHashs Hash一覧取得UseCase
+type IGetHashs interface {
+	Execute(req *GetHashsRequest) (*GetHashsResponse, error)
+}
+
+// GetHashsRequest Hash一覧取得Request
+type GetHashsRequest struct {
+}
+
+// GetHashsResponse Hash一覧取得Response
+type GetHashsResponse struct {
+	Hashs []*domain.HashModel
+}
+
 // ICreateHash Hash新規作成UseCase
 type ICreateHash interface {
 	Execute(req *CreateHashRequest) (*CreateHashResponse, error)

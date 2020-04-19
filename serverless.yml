@@ -72,9 +72,23 @@ package:
     - ./bin/**
 
 functions:
+  getHash:
+    name: ${self:custom.projectName}-GetHash
+    handler: bin/api/hash/get/main
+    events:
+      - http:
+          path: /v1/hashs/{hash_id}
+          method: get
+  getHashs:
+    name: ${self:custom.projectName}-GetHashs
+    handler: bin/api/hashs/get/main
+    events:
+      - http:
+          path: /v1/hashs
+          method: get
   postHashs:
     name: ${self:custom.projectName}-PostHashs
-    handler: bin/api/hash/post/main
+    handler: bin/api/hashs/post/main
     events:
       - http:
           path: /v1/hashs

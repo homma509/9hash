@@ -6,6 +6,48 @@ import (
 	"github.com/pkg/errors"
 )
 
+// HashGetter Hash取得
+type HashGetter struct {
+	HashRepository domain.HashRepository
+}
+
+// NewHashGetter Hash取得をインスタンス生成します
+func NewHashGetter(rep domain.HashRepository) *HashGetter {
+	return &HashGetter{
+		HashRepository: rep,
+	}
+}
+
+// Execute Hashを取得
+func (h *HashGetter) Execute(req *usecase.GetHashRequest) (*usecase.GetHashResponse, error) {
+	hash, err := h.HashRepository.GetHashByID(req.ID)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return &usecase.GetHashResponse{Hash: hash}, nil
+}
+
+// NewHashsGetter Hashs取得
+type HashsGetter struct {
+	HashRepository domain.HashRepository
+}
+
+// NewHashsGetter Hashs取得をインスタンス生成します
+func NewHashsGetter(rep domain.HashRepository) *HashsGetter {
+	return &HashsGetter{
+		HashRepository: rep,
+	}
+}
+
+// Execute Hashsを取得
+func (h *HashsGetter) Execute(req *usecase.GetHashsRequest) (*usecase.GetHashsResponse, error) {
+	hashs, err := h.HashRepository.GetHashs()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return &usecase.GetHashsResponse{Hashs: hashs}, nil
+}
+
 // HashCreator Hash新規作成
 type HashCreator struct {
 	HashRepository domain.HashRepository
