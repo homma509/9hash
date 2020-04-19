@@ -90,3 +90,29 @@ func (h *HashUpdator) Execute(req *usecase.UpdateHashRequest) (*usecase.UpdateHa
 
 	return &usecase.UpdateHashResponse{Hash: hash}, nil
 }
+
+// HashDeleter Hash削除
+type HashDeleter struct {
+	HashRepository domain.HashRepository
+}
+
+// NewHashDeleter Hash削除をインスタンス生成します
+func NewHashDeleter(rep domain.HashRepository) *HashDeleter {
+	return &HashDeleter{
+		HashRepository: rep,
+	}
+}
+
+func (h *HashDeleter) Execute(req *usecase.DeleteHashRequest) (*usecase.DeleteHashResponse, error) {
+	hash, err := h.HashRepository.GetHashByID(req.ID)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	err = h.HashRepository.DeleteHash(hash)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &usecase.DeleteHashResponse{}, nil
+}

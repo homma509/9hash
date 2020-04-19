@@ -77,6 +77,26 @@ func (h *UpdateHashRequest) ToHashModel() *domain.HashModel {
 	}
 }
 
+// IDeleteHash Hash削除UseCase
+type IDeleteHash interface {
+	Execute(req *DeleteHashRequest) (*DeleteHashResponse, error)
+}
+
+// DeleteHashRequest Hash削除Request
+type DeleteHashRequest struct {
+	ID uint64
+}
+
+// DeleteHashResponse Hash削除Response
+type DeleteHashResponse struct {
+}
+
+func (h *DeleteHashRequest) ToHashModel() *domain.HashModel {
+	return &domain.HashModel{
+		ID: h.ID,
+	}
+}
+
 func hashKey() string {
 	key := shortid.MustGenerate()
 	for key == "shorten" {

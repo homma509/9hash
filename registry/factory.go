@@ -111,3 +111,10 @@ func (f *Factory) BuildUpdateHash() usecase.IUpdateHash {
 			f.BuildHashOperator())
 	}).(usecase.IUpdateHash)
 }
+
+func (f *Factory) BuildDeleteHash() usecase.IDeleteHash {
+	return f.container("DeleteHash", func() interface{} {
+		return interactor.NewHashDeleter(
+			f.BuildHashOperator())
+	}).(usecase.IDeleteHash)
+}

@@ -7,6 +7,10 @@ import (
 	"github.com/golang/glog"
 )
 
+type Response struct {
+	Message string `json:"message"`
+}
+
 // Response400Body バリデーションエラーメッセージを含めた400レスポンス
 type Response400Body struct {
 	Message string            `json:"message"`
@@ -22,6 +26,11 @@ func headers() map[string]string {
 
 // Response200 200レスポンス
 func Response200(m interface{}) events.APIGatewayProxyResponse {
+	if m == nil {
+		m = &Response{
+			Message: "OK",
+		}
+	}
 	res, err := json.Marshal(m)
 	if err != nil {
 		return Response500(err)

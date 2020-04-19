@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/guregu/dynamo"
@@ -131,7 +130,6 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	log.Print("取得開始")
 
 	var hashResources []HashResource
 	err = table.Scan().
@@ -140,7 +138,6 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	log.Printf("取得件数：%d", len(hashResources))
 
 	var hashs = make([]*domain.HashModel, 1)
 	// for i := range hashResources {
@@ -186,6 +183,9 @@ func (h *HashOperator) DeleteHash(m *domain.HashModel) error {
 
 	err := h.Mapper.DeleteResource(r)
 	if err != nil {
+		if err.Error() == dynamo.ErrNotFound.Error() {
+			return errors.WithStack(domain.ErrNotFound)
+		}
 		return errors.WithStack(err)
 	}
 

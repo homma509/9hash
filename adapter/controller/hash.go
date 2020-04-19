@@ -126,3 +126,25 @@ func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 	return Response200(res.Hash)
 }
+
+func DeleteHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	// パスパラメータからHashIDを取得する
+	id, err := strconv.ParseUint(req.PathParameters["hash_id"], 10, 64)
+	if err != nil {
+		return Response500(err)
+	}
+
+	// 更新処理
+	deleter := registry.GetFactory().BuildDeleteHash()
+	_, err = deleter.Execute(&usecase.DeleteHashRequest{
+		ID: id,
+	})
+	if err != nil {
+		if err.Error() == domain.ErrNotFound.Error() {
+			return Response404()
+		}
+		return Response500(err)
+	}
+
+	return Response200(nil)
+}
