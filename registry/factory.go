@@ -90,3 +90,10 @@ func (f *Factory) BuildCreateHash() usecase.ICreateHash {
 			f.BuildHashOperator())
 	}).(usecase.ICreateHash)
 }
+
+func (f *Factory) BuildUpdateHash() usecase.IUpdateHash {
+	return f.container("UpdateHash", func() interface{} {
+		return interactor.NewHashUpdator(
+			f.BuildHashOperator())
+	}).(usecase.IUpdateHash)
+}

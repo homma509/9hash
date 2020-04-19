@@ -21,6 +21,15 @@ func headers() map[string]string {
 	}
 }
 
+// Response200 OKメッセージを含めたレスポンス
+func Response200() events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 200,
+		Headers:    headers(),
+		Body:       `{"message":"OK"}`,
+	}
+}
+
 // Response201 IDを含めたレスポンス
 func Response201(id uint64) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
@@ -52,7 +61,7 @@ func Response400(errs map[string]error) events.APIGatewayProxyResponse {
 
 // Response500 500レスポンス
 func Response500(err error) events.APIGatewayProxyResponse {
-	glog.Errorf("%+v\n", err)
+	glog.Errorf("%+v", err)
 	return events.APIGatewayProxyResponse{
 		StatusCode: 500,
 		Headers:    headers(),

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/homma509/9hash/registry"
@@ -24,7 +25,7 @@ type HashResponse struct {
 	Value string `json:"value"`
 }
 
-// PostHash Hashの新規作成
+// PostHashs Hashの新規作成
 func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// バリデーション処理
 	errs := ValidateBody(req.Body, ValidatorPostSetting)
@@ -50,4 +51,37 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 
 	// 201レスポンス
 	return Response201(res.HashID())
+}
+
+func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	// バリデーション処理
+	errs := ValidateBody(req.Body, ValidatorPostSetting)
+	if errs != nil {
+		return Response400(errs)
+	}
+
+	// JSON形式から構造体に変換
+	var h RequestPostHash
+	err := json.Unmarshal([]byte(req.Body), &h)
+	if err != nil {
+		return Response500(err)
+	}
+
+	// パスパラメータからHashIDを取得する
+	id, err := strconv.ParseUint(req.PathParameters["hash_id"], 10, 64)
+	if err != nil {
+		return Response500(err)
+	}
+
+	// 更新処理
+	updator := registry.GetFactory().BuildUpdateHash()
+	_, err = updator.Execute(&usecase.UpdateHashRequest{
+		ID:    id,
+		Value: h.Value,
+	})
+	if err != nil {
+		return Response500(err)
+	}
+
+	return Response200()
 }

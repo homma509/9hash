@@ -15,18 +15,40 @@ type CreateHashRequest struct {
 	Value string
 }
 
-// ToHashModel Hash新規作成RequestをHashモデルに変換します
-func (h *CreateHashRequest) ToHashModel() *domain.HashModel {
-	return domain.NewHashModel(hashKey(), h.Value)
-}
-
 // CreateHashResponse Hash新規作成Response
 type CreateHashResponse struct {
 	Hash *domain.HashModel
 }
 
+// ToHashModel Hash新規作成RequestをHashモデルに変換します
+func (h *CreateHashRequest) ToHashModel() *domain.HashModel {
+	return domain.NewHashModel(hashKey(), h.Value)
+}
+
 func (h *CreateHashResponse) HashID() uint64 {
 	return h.Hash.ID
+}
+
+// IUpdateHash Hash更新UseCase
+type IUpdateHash interface {
+	Execute(req *UpdateHashRequest) (*UpdateHashResponse, error)
+}
+
+// UpdateHashRequest Hash更新Request
+type UpdateHashRequest struct {
+	ID    uint64
+	Value string
+}
+
+// UpdateHashResponse Hash更新Response
+type UpdateHashResponse struct {
+}
+
+func (h *UpdateHashRequest) ToHashModel() *domain.HashModel {
+	return &domain.HashModel{
+		ID:    h.ID,
+		Value: h.Value,
+	}
 }
 
 func hashKey() string {

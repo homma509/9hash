@@ -27,3 +27,24 @@ func (h *HashCreator) Execute(req *usecase.CreateHashRequest) (*usecase.CreateHa
 
 	return &usecase.CreateHashResponse{Hash: hash}, nil
 }
+
+// HashUpdator Hash更新
+type HashUpdator struct {
+	HashRepository domain.HashRepository
+}
+
+// NewHashUpdator Hash更新をインスタンス生成します
+func NewHashUpdator(rep domain.HashRepository) *HashUpdator {
+	return &HashUpdator{
+		HashRepository: rep,
+	}
+}
+
+func (h *HashUpdator) Execute(req *usecase.UpdateHashRequest) (*usecase.UpdateHashResponse, error) {
+	err := h.HashRepository.UpdateHash(req.ToHashModel())
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &usecase.UpdateHashResponse{}, nil
+}

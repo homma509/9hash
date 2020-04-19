@@ -79,6 +79,13 @@ functions:
       - http:
           path: /v1/hashs
           method: post
+  putHash:
+    name: ${self:custom.projectName}-PutHash
+    handler: bin/api/hash/put/main
+    events:
+      - http:
+          path: /v1/hashs/{hash_id}
+          method: put
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

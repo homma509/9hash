@@ -107,7 +107,7 @@ func (d *DynamoModelMapper) buildQueryUpdate(r DynamoResource) (*dynamo.Put, err
 	r.SetUpdatedAt(time.Now())
 	r.SetVersion(oldVersion + 1)
 
-	query := table.Put(r).If("Version", dynamo.Equal, oldVersion)
+	query := table.Put(r).If("Version = ?", oldVersion)
 
 	return query, nil
 }
@@ -140,6 +140,7 @@ func (d *DynamoModelMapper) createResource(r DynamoResource) error {
 }
 
 func (d *DynamoModelMapper) updateResource(r DynamoResource) error {
+	log.Printf("更新リソース: %v", r)
 	query, err := d.buildQueryUpdate(r)
 	if err != nil {
 		return errors.WithStack(err)
@@ -191,8 +192,6 @@ func (d *DynamoModelMapper) atomicCount(pk, sk, counterName string, value uint64
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-
-	log.Printf("テーブル名：%s", d.TableName)
 
 	// TODO dynamo.DBを使って簡易化する
 	output, err := db.Client().UpdateItem(&dynamodb.UpdateItemInput{
