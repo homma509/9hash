@@ -50,7 +50,7 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 	}
 
 	// 201レスポンス
-	return Response201(res.HashID())
+	return Response201(res)
 }
 
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
@@ -75,7 +75,7 @@ func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 	// 更新処理
 	updator := registry.GetFactory().BuildUpdateHash()
-	_, err = updator.Execute(&usecase.UpdateHashRequest{
+	res, err := updator.Execute(&usecase.UpdateHashRequest{
 		ID:    id,
 		Value: h.Value,
 	})
@@ -83,5 +83,5 @@ func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 		return Response500(err)
 	}
 
-	return Response200()
+	return Response200(res)
 }

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/golang/glog"
@@ -21,21 +20,31 @@ func headers() map[string]string {
 	}
 }
 
-// Response200 OKメッセージを含めたレスポンス
-func Response200() events.APIGatewayProxyResponse {
+// Response200 200レスポンス
+func Response200(m interface{}) events.APIGatewayProxyResponse {
+	res, err := json.Marshal(m)
+	if err != nil {
+		return Response500(err)
+	}
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 		Headers:    headers(),
-		Body:       `{"message":"OK"}`,
+		Body:       string(res),
 	}
 }
 
-// Response201 IDを含めたレスポンス
-func Response201(id uint64) events.APIGatewayProxyResponse {
+// Response201 201レスポンス
+func Response201(m interface{}) events.APIGatewayProxyResponse {
+	res, err := json.Marshal(m)
+	if err != nil {
+		return Response500(err)
+	}
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: 201,
 		Headers:    headers(),
-		Body:       fmt.Sprintf(`{"message":"OK","id":%d}`, id),
+		Body:       string(res),
 	}
 }
 

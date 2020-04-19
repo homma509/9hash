@@ -41,10 +41,10 @@ func NewHashUpdator(rep domain.HashRepository) *HashUpdator {
 }
 
 func (h *HashUpdator) Execute(req *usecase.UpdateHashRequest) (*usecase.UpdateHashResponse, error) {
-	err := h.HashRepository.UpdateHash(req.ToHashModel())
+	hash, err := h.HashRepository.UpdateHash(req.ToHashModel())
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	return &usecase.UpdateHashResponse{}, nil
+	return &usecase.UpdateHashResponse{Hash: hash}, nil
 }

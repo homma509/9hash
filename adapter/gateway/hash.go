@@ -158,20 +158,20 @@ func (h *HashOperator) CreateHash(m *domain.HashModel) (*domain.HashModel, error
 	return &r.HashModel, nil
 }
 
-func (h *HashOperator) UpdateHash(m *domain.HashModel) error {
+func (h *HashOperator) UpdateHash(m *domain.HashModel) (*domain.HashModel, error) {
 	r, err := h.getUserResourceByID(m.ID)
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
 	r.Value = m.Value
 
 	err = h.Mapper.PutResource(r)
 	if err != nil {
-		return errors.WithStack(err)
+		return nil, errors.WithStack(err)
 	}
 
-	return nil
+	return &r.HashModel, nil
 }
 
 func (h *HashOperator) DeleteHash(m *domain.HashModel) error {

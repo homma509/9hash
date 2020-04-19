@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -140,7 +139,6 @@ func (d *DynamoModelMapper) createResource(r DynamoResource) error {
 }
 
 func (d *DynamoModelMapper) updateResource(r DynamoResource) error {
-	log.Printf("更新リソース: %v", r)
 	query, err := d.buildQueryUpdate(r)
 	if err != nil {
 		return errors.WithStack(err)

@@ -21,6 +21,6 @@ type HashRepository interface {
 	GetHashByID(id uint64) (*HashModel, error)
 	GetHashByKey(key string) (*HashModel, error)
 	CreateHash(h *HashModel) (*HashModel, error)
-	UpdateHash(h *HashModel) error
+	UpdateHash(h *HashModel) (*HashModel, error)
 	DeleteHash(h *HashModel) error
 }

@@ -25,10 +25,6 @@ func (h *CreateHashRequest) ToHashModel() *domain.HashModel {
 	return domain.NewHashModel(hashKey(), h.Value)
 }
 
-func (h *CreateHashResponse) HashID() uint64 {
-	return h.Hash.ID
-}
-
 // IUpdateHash Hash更新UseCase
 type IUpdateHash interface {
 	Execute(req *UpdateHashRequest) (*UpdateHashResponse, error)
@@ -42,6 +38,7 @@ type UpdateHashRequest struct {
 
 // UpdateHashResponse Hash更新Response
 type UpdateHashResponse struct {
+	Hash *domain.HashModel
 }
 
 func (h *UpdateHashRequest) ToHashModel() *domain.HashModel {
