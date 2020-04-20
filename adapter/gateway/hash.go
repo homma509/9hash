@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/guregu/dynamo"
@@ -112,7 +111,7 @@ func (h *HashOperator) GetHashByKey(key string) (*domain.HashModel, error) {
 	var hashs []HashResource
 	err = table.Scan().
 		Filter("Key", dynamo.Equal, key).
-		Filter(fmt.Sprintf("begins_with('%s', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{}))).
+		Filter("begins_with('PK', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{})).
 		All(&hashs)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -133,17 +132,16 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 
 	var hashResources []HashResource
 	err = table.Scan().
-		Filter(fmt.Sprintf("begins_with('%s', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{}))).
+		Filter("begins_with('PK', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{})).
 		All(&hashResources)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	var hashs = make([]*domain.HashModel, 1)
-	// for i := range hashResources {
-	// 	hashs[i] = &hashResources[i].HashModel
-	// }
-	hashs[0] = &hashResources[0].HashModel
+	var hashs = make([]*domain.HashModel, len(hashResources))
+	for i := range hashResources {
+		hashs[i] = &hashResources[i].HashModel
+	}
 
 	return hashs, nil
 }

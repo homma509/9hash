@@ -60,7 +60,7 @@ func GetHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 	}
 
 	// 200レスポンス
-	return Response200(res.Hashs[0])
+	return Response200(res.Hashs)
 }
 
 // PostHashs Hashの新規作成
