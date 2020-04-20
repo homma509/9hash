@@ -57,6 +57,16 @@ func Response201(m interface{}) events.APIGatewayProxyResponse {
 	}
 }
 
+// Response308 308レスポンス
+func Response308(url string) events.APIGatewayProxyResponse {
+	return events.APIGatewayProxyResponse{
+		StatusCode: 308,
+		Headers: map[string]string{
+			"location": url,
+		},
+	}
+}
+
 // Response400 400レスポンス
 func Response400(errs map[string]error) events.APIGatewayProxyResponse {
 	glog.Warningf("%+v", errs)

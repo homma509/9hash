@@ -110,7 +110,7 @@ func (h *HashOperator) GetHashByKey(key string) (*domain.HashModel, error) {
 
 	var hashs []HashResource
 	err = table.Scan().
-		Filter("Key", dynamo.Equal, key).
+		Filter("'Key' = ?", key).
 		Filter("begins_with('PK', ?)", h.Mapper.GetEntityNameFromStruct(HashResource{})).
 		All(&hashs)
 	if err != nil {

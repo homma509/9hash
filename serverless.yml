@@ -107,6 +107,13 @@ functions:
       - http:
           path: /v1/hashs/{hash_id}
           method: delete
+  getURL:
+    name: ${self:custom.projectName}-GetURL
+    handler: bin/api/url/get/main
+    events:
+      - http:
+          path: /v1/url/{key}
+          method: get
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

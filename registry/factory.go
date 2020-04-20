@@ -118,3 +118,10 @@ func (f *Factory) BuildDeleteHash() usecase.IDeleteHash {
 			f.BuildHashOperator())
 	}).(usecase.IDeleteHash)
 }
+
+func (f *Factory) BuildGetURL() usecase.IGetURL {
+	return f.container("GetURL", func() interface{} {
+		return interactor.NewURLGetter(
+			f.BuildHashOperator())
+	}).(usecase.IGetURL)
+}
