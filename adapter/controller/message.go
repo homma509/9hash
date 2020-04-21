@@ -11,7 +11,8 @@ var messages = map[error]string{
 }
 
 var names = map[string]string{
-	"value": "Hash値",
+	"value":  "value",
+	"values": "values",
 }
 
 func ToMessages(errs map[string]error) map[string]string {

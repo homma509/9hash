@@ -12,17 +12,21 @@ import (
 
 // ValidatorPostSetting バリデーション設定
 var ValidatorPostSetting = []*ValidatorSetting{
+	{ArgName: "values", ValidateTags: "required"},
+}
+
+// RequestPostHashs PostHashsのリクエスト
+type RequestPostHashs struct {
+	Values []string `json:"values"`
+}
+
+// ValidatorPutSetting バリデーション設定
+var ValidatorPutSetting = []*ValidatorSetting{
 	{ArgName: "value", ValidateTags: "required"},
 }
 
-// RequestPostHash PostHashのリクエスト
-type RequestPostHash struct {
-	Value string `json:"value"`
-}
-
-// HashResponse レスポンス用のJSON形式を表した構造体
-type HashResponse struct {
-	Key   string `json:"key"`
+// RequestPutHash PutHashのリクエスト
+type RequestPutHash struct {
 	Value string `json:"value"`
 }
 
@@ -72,7 +76,7 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 	}
 
 	// JSON形式から構造体に変換
-	var h RequestPostHash
+	var h RequestPostHashs
 	err := json.Unmarshal([]byte(req.Body), &h)
 	if err != nil {
 		return Response500(err)
@@ -80,26 +84,30 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 
 	// 新規作成処理
 	creator := registry.GetFactory().BuildCreateHash()
-	res, err := creator.Execute(&usecase.CreateHashRequest{
-		Value: h.Value,
-	})
-	if err != nil {
-		return Response500(err)
+	hashs := make([]*domain.HashModel, len(h.Values))
+	for i, v := range h.Values {
+		res, err := creator.Execute(&usecase.CreateHashRequest{
+			Value: v,
+		})
+		if err != nil {
+			return Response500(err)
+		}
+		hashs[i] = res.Hash
 	}
 
 	// 201レスポンス
-	return Response201(res.Hash)
+	return Response201(hashs)
 }
 
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// バリデーション処理
-	errs := ValidateBody(req.Body, ValidatorPostSetting)
+	errs := ValidateBody(req.Body, ValidatorPutSetting)
 	if errs != nil {
 		return Response400(errs)
 	}
 
 	// JSON形式から構造体に変換
-	var h RequestPostHash
+	var h RequestPutHash
 	err := json.Unmarshal([]byte(req.Body), &h)
 	if err != nil {
 		return Response500(err)
