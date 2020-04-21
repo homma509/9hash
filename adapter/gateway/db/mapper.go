@@ -3,11 +3,8 @@ package db
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/guregu/dynamo"
 	"github.com/pkg/errors"
 )
@@ -171,13 +168,7 @@ func (d *DynamoModelMapper) isNewEntity(r DynamoResource) bool {
 }
 
 func (d *DynamoModelMapper) generateID(tableName string) (uint64, error) {
-	attr, err := d.atomicCount(fmt.Sprintf("AtomicCounter-%s", tableName), "AtomicCounter", "CurrentNumber", 1)
-	if err != nil {
-		return 0, errors.WithStack(err)
-	}
-
-	s := aws.StringValue(attr.N)
-	n, err := strconv.ParseUint(s, 10, 64)
+	n, err := d.atomicCount(tableName)
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
@@ -185,37 +176,25 @@ func (d *DynamoModelMapper) generateID(tableName string) (uint64, error) {
 	return n, nil
 }
 
-func (d *DynamoModelMapper) atomicCount(pk, sk, counterName string, value uint64) (*dynamodb.AttributeValue, error) {
-	db, err := d.Client.ConnectDB()
+func (d *DynamoModelMapper) atomicCount(tableName string) (uint64, error) {
+	table, err := d.Client.ConnectTable()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return 0, errors.WithStack(err)
 	}
 
-	// TODO dynamo.DBを使って簡易化する
-	output, err := db.Client().UpdateItem(&dynamodb.UpdateItemInput{
-		TableName: aws.String(d.TableName),
-		Key: map[string]*dynamodb.AttributeValue{
-			"PK": {
-				S: aws.String(pk),
-			},
-			"SK": {
-				S: aws.String(sk),
-			},
-		},
-		AttributeUpdates: map[string]*dynamodb.AttributeValueUpdate{
-			counterName: {
-				Action: aws.String("ADD"),
-				Value: &dynamodb.AttributeValue{
-					N: aws.String(fmt.Sprintf("%d", value)),
-				},
-			},
-		},
-		ReturnValues: aws.String(dynamodb.ReturnValueUpdatedNew),
-	})
-
-	if err != nil {
-		return nil, errors.WithStack(err)
+	type count struct {
+		CurrentNumber uint64
 	}
 
-	return output.Attributes[counterName], nil
+	var result count
+	err = table.
+		Update("PK", fmt.Sprintf("AtomicCounter-%s", tableName)).
+		Range("SK", "AtomicCounter").
+		Add("CurrentNumber", 1).
+		Value(&result)
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+
+	return result.CurrentNumber, nil
 }
