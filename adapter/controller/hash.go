@@ -84,19 +84,15 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 
 	// 新規作成処理
 	creator := registry.GetFactory().BuildCreateHash()
-	hashs := make([]*domain.HashModel, len(h.Values))
-	for i, v := range h.Values {
-		res, err := creator.Execute(&usecase.CreateHashRequest{
-			Value: v,
-		})
-		if err != nil {
-			return Response500(err)
-		}
-		hashs[i] = res.Hash
+	res, err := creator.Execute(&usecase.CreateHashsRequest{
+		Values: h.Values,
+	})
+	if err != nil {
+		return Response500(err)
 	}
 
 	// 201レスポンス
-	return Response201(hashs)
+	return Response201(res.Hashs)
 }
 
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {

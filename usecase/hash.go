@@ -54,6 +54,31 @@ func (h *CreateHashRequest) ToHashModel() *domain.HashModel {
 	return domain.NewHashModel(hashKey(), h.Value)
 }
 
+// ICreateHashs Hashs新規作成UseCase
+type ICreateHashs interface {
+	Execute(req *CreateHashsRequest) (*CreateHashsResponse, error)
+}
+
+// CreateHashsRequest Hashs新規作成Request
+type CreateHashsRequest struct {
+	Values []string
+}
+
+// CreateHashsResponse Hashs新規作成Response
+type CreateHashsResponse struct {
+	Hashs []*domain.HashModel
+}
+
+// ToHashsModel Hashs新規作成RequestをHashモデル配列に変換します
+func (h *CreateHashsRequest) ToHashsModel() []*domain.HashModel {
+	hashs := make([]*domain.HashModel, len(h.Values))
+	for i, value := range h.Values {
+		hash := domain.NewHashModel(hashKey(), value)
+		hashs[i] = hash
+	}
+	return hashs
+}
+
 // IUpdateHash Hash更新UseCase
 type IUpdateHash interface {
 	Execute(req *UpdateHashRequest) (*UpdateHashResponse, error)

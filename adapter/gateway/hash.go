@@ -157,6 +157,33 @@ func (h *HashOperator) CreateHash(m *domain.HashModel) (*domain.HashModel, error
 	return &r.HashModel, nil
 }
 
+func (h *HashOperator) CreateHashs(ms []*domain.HashModel) ([]*domain.HashModel, error) {
+	rs := make([]*HashResource, len(ms))
+	for i, m := range ms {
+		rs[i] = NewHashResource(m, h.Mapper)
+	}
+
+	err := h.Mapper.PutResources(ToDynamoResources(rs))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	hashs := make([]*domain.HashModel, len(rs))
+	for i, r := range rs {
+		hashs[i] = &r.HashModel
+	}
+
+	return hashs, nil
+}
+
+func ToDynamoResources(rs []*HashResource) []db.DynamoResource {
+	ds := make([]db.DynamoResource, len(rs))
+	for i, r := range rs {
+		ds[i] = r
+	}
+	return ds
+}
+
 func (h *HashOperator) UpdateHash(m *domain.HashModel) (*domain.HashModel, error) {
 	r, err := h.getUserResourceByID(m.ID)
 	if err != nil {

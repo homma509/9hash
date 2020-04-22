@@ -44,6 +44,25 @@ func (d *DynamoModelMapper) PutResource(r DynamoResource) error {
 	return d.updateResource(r)
 }
 
+func (d *DynamoModelMapper) PutResources(rs []DynamoResource) error {
+	// TODO transaction
+	var err error
+	for _, r := range rs {
+		if d.isNewEntity(r) {
+			err = d.createResource(r)
+			if err != nil {
+				return err
+			}
+		} else {
+			err = d.updateResource(r)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (d *DynamoModelMapper) GetPK(r DynamoResource) string {
 	return fmt.Sprintf("%s-%011d", r.EntityName(), r.ID())
 }

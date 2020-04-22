@@ -98,11 +98,11 @@ func (f *Factory) BuildGetHashs() usecase.IGetHashs {
 	}).(usecase.IGetHashs)
 }
 
-func (f *Factory) BuildCreateHash() usecase.ICreateHash {
+func (f *Factory) BuildCreateHash() usecase.ICreateHashs {
 	return f.container("CreateHash", func() interface{} {
-		return interactor.NewHashCreator(
+		return interactor.NewHashsCreator(
 			f.BuildHashOperator())
-	}).(usecase.ICreateHash)
+	}).(usecase.ICreateHashs)
 }
 
 func (f *Factory) BuildUpdateHash() usecase.IUpdateHash {

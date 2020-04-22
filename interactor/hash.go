@@ -70,6 +70,28 @@ func (h *HashCreator) Execute(req *usecase.CreateHashRequest) (*usecase.CreateHa
 	return &usecase.CreateHashResponse{Hash: hash}, nil
 }
 
+// HashsCreator Hashs新規作成
+type HashsCreator struct {
+	HashRepository domain.HashRepository
+}
+
+// NewHashsCreator Hashs新規作成をインスタンス生成します
+func NewHashsCreator(rep domain.HashRepository) *HashsCreator {
+	return &HashsCreator{
+		HashRepository: rep,
+	}
+}
+
+// Execute Hashsを新規作成
+func (h *HashsCreator) Execute(req *usecase.CreateHashsRequest) (*usecase.CreateHashsResponse, error) {
+	hashs, err := h.HashRepository.CreateHashs(req.ToHashsModel())
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &usecase.CreateHashsResponse{Hashs: hashs}, nil
+}
+
 // HashUpdator Hash更新
 type HashUpdator struct {
 	HashRepository domain.HashRepository

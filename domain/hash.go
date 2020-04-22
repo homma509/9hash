@@ -18,9 +18,10 @@ func NewHashModel(key, value string) *HashModel {
 // HashRepository Hashモデルのリポジトリ
 type HashRepository interface {
 	GetHashs() ([]*HashModel, error)
-	GetHashByID(id uint64) (*HashModel, error)
-	GetHashByKey(key string) (*HashModel, error)
-	CreateHash(h *HashModel) (*HashModel, error)
-	UpdateHash(h *HashModel) (*HashModel, error)
-	DeleteHash(h *HashModel) error
+	GetHashByID(uint64) (*HashModel, error)
+	GetHashByKey(string) (*HashModel, error)
+	CreateHash(*HashModel) (*HashModel, error)
+	CreateHashs([]*HashModel) ([]*HashModel, error)
+	UpdateHash(*HashModel) (*HashModel, error)
+	DeleteHash(*HashModel) error
 }
