@@ -11,8 +11,8 @@ var messages = map[error]string{
 }
 
 var names = map[string]string{
-	"value":  "value",
-	"values": "values",
+	"value":  "値",
+	"values": "値",
 }
 
 func ToMessages(errs map[string]error) map[string]string {
@@ -21,9 +21,9 @@ func ToMessages(errs map[string]error) map[string]string {
 		name := names[k]
 		message, ok := messages[v]
 		if ok {
-			msgs[name] = fmt.Sprintf(message, name)
+			msgs[k] = fmt.Sprintf(message, name)
 		} else {
-			msgs[name] = v.Error()
+			msgs[k] = v.Error()
 		}
 	}
 	return msgs

@@ -29,7 +29,8 @@ func validate(params map[string]interface{}, settings []*ValidatorSetting) map[s
 	for _, setting := range settings {
 		err := validator.Valid(params[setting.ArgName], setting.ValidateTags)
 		if err != nil {
-			errs[setting.ArgName] = err.(validator.ErrorArray)
+			arr := err.(validator.ErrorArray)
+			errs[setting.ArgName] = arr[0]
 		}
 	}
 
@@ -56,8 +57,20 @@ func requiredValidator(v interface{}, param string) error {
 
 	s := reflect.ValueOf(v)
 
-	if s.String() == "" {
-		return validator.ErrZeroValue
+	switch s.Kind() {
+	case reflect.Slice, reflect.Array:
+		if s.Len() == 0 {
+			return validator.ErrZeroValue
+		}
+		for i := 0; i < s.Len(); i++ {
+			if s.Index(i).Elem().String() == "" {
+				return validator.ErrZeroValue
+			}
+		}
+	default:
+		if s.String() == "" {
+			return validator.ErrZeroValue
+		}
 	}
 
 	return nil
