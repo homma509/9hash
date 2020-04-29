@@ -28,5 +28,8 @@ package:
 deploy:
 	$(DOCKER) run sls sls deploy
 
+clean:
+	./scripts/clean.sh
+
 remove:
 	$(DOCKER) run sls sls remove
