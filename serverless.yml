@@ -73,26 +73,26 @@ package:
   exclude:
     - ./**
   include:
-    - ./bin/**
+    - ./build/**
 
 functions:
   getHash:
     name: ${self:custom.projectName}-GetHash
-    handler: bin/api/hash/get/main
+    handler: build/api/hash/get/main
     events:
       - http:
           path: /v1/hashs/{hash_id}
           method: get
   getHashs:
     name: ${self:custom.projectName}-GetHashs
-    handler: bin/api/hashs/get/main
+    handler: build/api/hashs/get/main
     events:
       - http:
           path: /v1/hashs
           method: get
   postHashs:
     name: ${self:custom.projectName}-PostHashs
-    handler: bin/api/hashs/post/main
+    handler: build/api/hashs/post/main
     events:
       - http:
           path: /v1/hashs
@@ -100,7 +100,7 @@ functions:
           cors: true
   putHash:
     name: ${self:custom.projectName}-PutHash
-    handler: bin/api/hash/put/main
+    handler: build/api/hash/put/main
     events:
       - http:
           path: /v1/hashs/{hash_id}
@@ -108,7 +108,7 @@ functions:
           cors: true
   deleteHash:
     name: ${self:custom.projectName}-DeleteHash
-    handler: bin/api/hash/delete/main
+    handler: build/api/hash/delete/main
     events:
       - http:
           path: /v1/hashs/{hash_id}
@@ -116,7 +116,7 @@ functions:
           cors: true
   getURL:
     name: ${self:custom.projectName}-GetURL
-    handler: bin/api/url/get/main
+    handler: build/api/url/get/main
     events:
       - http:
           path: /v1/url/{key}
