@@ -37,32 +37,6 @@ func (d *DynamoModelMapper) GetEntityNameFromStruct(s interface{}) string {
 	return r.Name()
 }
 
-func (d *DynamoModelMapper) PutResource(r DynamoResource) error {
-	if d.isNewEntity(r) {
-		return d.createResource(r)
-	}
-	return d.updateResource(r)
-}
-
-func (d *DynamoModelMapper) PutResources(rs []DynamoResource) error {
-	// TODO transaction
-	var err error
-	for _, r := range rs {
-		if d.isNewEntity(r) {
-			err = d.createResource(r)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = d.updateResource(r)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func (d *DynamoModelMapper) GetPK(r DynamoResource) string {
 	return fmt.Sprintf("%s-%011d", r.EntityName(), r.ID())
 }
@@ -111,6 +85,34 @@ func (d *DynamoModelMapper) buildQueryCreate(r DynamoResource) (*dynamo.Put, err
 	return query, nil
 }
 
+func (d *DynamoModelMapper) buildQueryCreates(rs []DynamoResource) (*dynamo.WriteTx, error) {
+	table, err := d.Client.ConnectTable()
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	tx := d.Client.Client.Client.WriteTx()
+	tx.Idempotent(true)
+
+	for _, r := range rs {
+		id, err := d.generateID(r.EntityName())
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		r.SetCreatedAt(time.Now())
+		r.SetUpdatedAt(time.Now())
+		r.SetID(id)
+		r.SetVersion(1)
+		r.SetPK()
+		r.SetSK()
+
+		tx.Put(table.Put(r).If("attribute_not_exists(ID)"))
+	}
+
+	return tx, nil
+}
+
 func (d *DynamoModelMapper) buildQueryUpdate(r DynamoResource) (*dynamo.Put, error) {
 	table, err := d.Client.ConnectTable()
 	if err != nil {
@@ -140,7 +142,7 @@ func (d *DynamoModelMapper) buildQueryDelete(r DynamoResource) (*dynamo.Delete, 
 	return query, nil
 }
 
-func (d *DynamoModelMapper) createResource(r DynamoResource) error {
+func (d *DynamoModelMapper) CreateResource(r DynamoResource) error {
 	query, err := d.buildQueryCreate(r)
 	if err != nil {
 		return errors.WithStack(err)
@@ -154,7 +156,21 @@ func (d *DynamoModelMapper) createResource(r DynamoResource) error {
 	return nil
 }
 
-func (d *DynamoModelMapper) updateResource(r DynamoResource) error {
+func (d *DynamoModelMapper) CreateResources(rs []DynamoResource) error {
+	tx, err := d.buildQueryCreates(rs)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	err = tx.Run()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+func (d *DynamoModelMapper) UpdateResource(r DynamoResource) error {
 	query, err := d.buildQueryUpdate(r)
 	if err != nil {
 		return errors.WithStack(err)
@@ -180,10 +196,6 @@ func (d *DynamoModelMapper) DeleteResource(r DynamoResource) error {
 	}
 
 	return nil
-}
-
-func (d *DynamoModelMapper) isNewEntity(r DynamoResource) bool {
-	return r.Version() == 0
 }
 
 func (d *DynamoModelMapper) generateID(tableName string) (uint64, error) {

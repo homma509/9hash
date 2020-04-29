@@ -42,6 +42,21 @@ services:
     networks:
       - net
 
+  npm:
+    build:
+      context: ./web/app/
+      dockerfile: ./Dockerfile_npm
+    ports: 
+      - "8080:8080"
+    volumes: 
+      - ./web/app:/usr/src/app/:cached
+    env_file: 
+      - .env
+    networks:
+      - net
+    tty:
+      true
+
 networks:
   net:
     driver: bridge

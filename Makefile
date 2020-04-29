@@ -1,5 +1,5 @@
 DOCKER_YAML=-f docker-compose.yml
-DOCKER=COMPOSE_PROJECT_NAME=hash docker-compose $(DOCKER_YAML)
+DOCKER=COMPOSE_PROJECT_NAME=9hash docker-compose $(DOCKER_YAML)
 
 docker-build:
 	$(DOCKER) build ${ARGS}
@@ -13,6 +13,12 @@ go-lint:
 go-build:
 	$(DOCKER) run go ./scripts/go-build.sh
 
+npm-serve:
+	$(DOCKER) run --service-ports npm npm run serve
+
+npm-build:
+	$(DOCKER) run npm npm run build
+
 sample:
 	$(DOCKER) run sls sls create --template aws-go --name serverless-sample --path ./serverless_sample
 
@@ -20,7 +26,7 @@ package:
 	$(DOCKER) run sls sls package
 
 deploy:
-	$(DOCKER) run sls ./scripts/deploy.sh
+	$(DOCKER) run sls sls deploy
 
 remove:
 	$(DOCKER) run sls sls remove

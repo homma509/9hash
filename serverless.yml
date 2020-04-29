@@ -23,9 +23,13 @@ frameworkVersion: '>=1.28.0 <2.0.0'
 
 custom:
   projectName: nhash
+  s3Sync:
+    - bucketName: ${env:BUCKET_NAME}
+      localDir: web/app/dist/
 
 plugins:
   - serverless-dotenv-plugin
+  - serverless-s3-sync
 
 provider:
   name: aws
@@ -93,6 +97,7 @@ functions:
       - http:
           path: /v1/hashs
           method: post
+          cors: true
   putHash:
     name: ${self:custom.projectName}-PutHash
     handler: bin/api/hash/put/main
@@ -100,6 +105,7 @@ functions:
       - http:
           path: /v1/hashs/{hash_id}
           method: put
+          cors: true
   deleteHash:
     name: ${self:custom.projectName}-DeleteHash
     handler: bin/api/hash/delete/main
@@ -107,6 +113,7 @@ functions:
       - http:
           path: /v1/hashs/{hash_id}
           method: delete
+          cors: true
   getURL:
     name: ${self:custom.projectName}-GetURL
     handler: bin/api/url/get/main
@@ -174,6 +181,98 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${env:DYNAMO_TABLE_NAME}
+    StaticContentsS3:
+      Type: AWS::S3::Bucket
+      # DeletionPolicy: Retain
+      Properties:
+        AccessControl: Private
+        BucketName: ${env:BUCKET_NAME}
+        # Tags:
+        #   - Key: Name
+        #     Value: ${self:service}-${opt:stage}
+    StaticContentsS3Policy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: StaticContentsS3
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS:
+                  Fn::Join:
+                    - " "
+                    - - "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity"
+                      - Ref: StaticCloudFrontOriginAccessIdentity
+              Action: s3:GetObject
+              Resource:
+                Fn::Join:
+                  - "/"
+                  - - Fn::GetAtt:
+                        - StaticContentsS3
+                        - Arn
+                    - "*"
+    StaticContentsCloudFront:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          Comment: "Delivery static contents"
+          PriceClass: PriceClass_200
+          DefaultRootObject: index.html
+          Origins:
+            - Id: S3Origin
+              DomainName:
+                Fn::GetAtt:
+                  - StaticContentsS3
+                  - DomainName
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Join:
+                    - "/"
+                    - - origin-access-identity/cloudfront
+                      - Ref: StaticCloudFrontOriginAccessIdentity
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            Compress: true
+            DefaultTTL: 900
+            MaxTTL: 1200
+            MinTTL: 600
+            ForwardedValues:
+              QueryString: true
+            SmoothStreaming: false
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: https-only
+          CustomErrorResponses:
+            - ErrorCachingMinTTL: 300
+              ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+    StaticCloudFrontOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment:
+            Ref: AWS::StackName
+  Outputs:
+    StaticContentsCloudFrontUrl:
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Fn::GetAtt:
+              - StaticContentsCloudFront
+              - DomainName
+
+
+
 # you can add CloudFormation resource templates here
 #resources:
 #  Resources:

@@ -62,7 +62,8 @@ func Response308(url string) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{
 		StatusCode: 308,
 		Headers: map[string]string{
-			"location": url,
+			"location":      url,
+			"cache-control": "no-store",
 		},
 	}
 }

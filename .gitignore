@@ -1,4 +1,12 @@
-.env.aws-credentials
-.serverless*
-bin
+.DS_Store
 node_modules
+
+# env files
+.env
+.env.aws-credentials
+
+# sls package files
+.serverless
+
+# go build files
+build

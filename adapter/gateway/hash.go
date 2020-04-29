@@ -149,7 +149,7 @@ func (h *HashOperator) GetHashs() ([]*domain.HashModel, error) {
 func (h *HashOperator) CreateHash(m *domain.HashModel) (*domain.HashModel, error) {
 	r := NewHashResource(m, h.Mapper)
 
-	err := h.Mapper.PutResource(r)
+	err := h.Mapper.CreateResource(r)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -163,7 +163,7 @@ func (h *HashOperator) CreateHashs(ms []*domain.HashModel) ([]*domain.HashModel,
 		rs[i] = NewHashResource(m, h.Mapper)
 	}
 
-	err := h.Mapper.PutResources(ToDynamoResources(rs))
+	err := h.Mapper.CreateResources(ToDynamoResources(rs))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -195,7 +195,7 @@ func (h *HashOperator) UpdateHash(m *domain.HashModel) (*domain.HashModel, error
 
 	r.Value = m.Value
 
-	err = h.Mapper.PutResource(r)
+	err = h.Mapper.UpdateResource(r)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
