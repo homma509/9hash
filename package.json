@@ -3,6 +3,7 @@
   "description": "",
   "license": "MIT",
   "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "@ionic/vue": "0.0.4",
     "axios": "^0.19.2",

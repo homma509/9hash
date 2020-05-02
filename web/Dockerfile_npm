@@ -1,7 +1,7 @@
 FROM node:12.8.0-alpine
 
 WORKDIR /usr/src/app
-COPY . /usr/src/app
+COPY ./app/ /usr/src
 
 RUN apk update && \
     npm install

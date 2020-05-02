@@ -16,8 +16,14 @@ go-build:
 npm-serve:
 	$(DOCKER) run --service-ports npm npm run serve
 
+npm-lint:
+	$(DOCKER) run npm npm run lint
+
 npm-build:
 	$(DOCKER) run npm npm run build
+
+# npm-clean:
+# 	$(DOCKER) run npm npm cache clean --force
 
 sample:
 	$(DOCKER) run sls sls create --template aws-go --name serverless-sample --path ./serverless_sample
@@ -26,10 +32,11 @@ package:
 	$(DOCKER) run sls sls package
 
 deploy:
-	$(DOCKER) run sls sls deploy
+	$(DOCKER) run sls sls deploy ${ARGS}
+	# make ARGS="--stage prod" deploy
 
 clean:
 	./scripts/clean.sh
 
 remove:
-	$(DOCKER) run sls sls remove
+	$(DOCKER) run sls sls remove ${ARGS}

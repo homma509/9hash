@@ -44,12 +44,12 @@ services:
 
   npm:
     build:
-      context: ./web/app/
+      context: ./web/
       dockerfile: ./Dockerfile_npm
     ports: 
       - "8080:8080"
     volumes: 
-      - ./web/app:/usr/src/app/:cached
+      - ./web/app:/usr/src/app/
     env_file: 
       - .env
     networks:

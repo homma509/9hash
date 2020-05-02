@@ -34,7 +34,7 @@ export default {
     async onClick() {
       try {
         const response = await axios.post(`${baseUrl}hashs`, {
-          values: this.URLs.split('\n').filter(URL => URL.length > 0)
+          values: this.URLs.split("\n").filter(URL => URL.length > 0)
         });
         console.log(response.data);
         this.toCSV(response.data);
@@ -44,22 +44,22 @@ export default {
       }
     },
     toCSV: function(data) {
-        try {
-            var csv = "短縮URL,URL\n";
-            data.forEach(element => {
-                var line;
-                line = baseUrl + "url/" + element["Key"];
-                line += "," + element["Value"] + "\n";
-                csv += line;
-            });
-            let blob = new Blob([csv], { type: "text/csv" });
-            let link = document.createElement("a");
-            link.href = window.URL.createObjectURL(blob);
-            link.download = "URL.csv";
-            link.click();
-        } catch (e) {
-            console.log(e);
-        }
+      try {
+        var csv = "短縮URL,URL\n";
+        data.forEach(element => {
+          var line;
+          line = baseUrl + "url/" + element["Key"];
+          line += "," + element["Value"] + "\n";
+          csv += line;
+        });
+        let blob = new Blob([csv], { type: "text/csv" });
+        let link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = "URL.csv";
+        link.click();
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 };
