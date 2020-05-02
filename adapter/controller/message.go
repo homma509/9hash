@@ -15,6 +15,7 @@ var names = map[string]string{
 	"values": "値",
 }
 
+// ToMessages エラーメッセージへ変換
 func ToMessages(errs map[string]error) map[string]string {
 	msgs := map[string]string{}
 	for k, v := range errs {

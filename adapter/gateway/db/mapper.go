@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// DynamoResource DynamoDBのリソースを表した構造体
 type DynamoResource interface {
 	EntityName() string
 	PK() string
@@ -25,6 +26,7 @@ type DynamoResource interface {
 	SetUpdatedAt(t time.Time)
 }
 
+// DynamoModelMapper ModelをDynamoDbにマップする構造体
 type DynamoModelMapper struct {
 	Client    *ResourceTableOperator
 	TableName string
@@ -32,18 +34,23 @@ type DynamoModelMapper struct {
 	SKName    string
 }
 
+// GetEntityNameFromStruct StructからEntity名を取得
 func (d *DynamoModelMapper) GetEntityNameFromStruct(s interface{}) string {
 	r := reflect.TypeOf(s)
 	return r.Name()
 }
 
+// GetPK PKの取得
 func (d *DynamoModelMapper) GetPK(r DynamoResource) string {
 	return fmt.Sprintf("%s-%011d", r.EntityName(), r.ID())
 }
 
+// GetSK SKの取得
 func (d *DynamoModelMapper) GetSK(r DynamoResource) string {
 	return fmt.Sprintf("%011d", r.ID())
 }
+
+// GetEintityByID IDからEntityを取得
 func (d *DynamoModelMapper) GetEintityByID(id uint64, r DynamoResource, ret interface{}) (interface{}, error) {
 	table, err := d.Client.ConnectTable()
 	if err != nil {
@@ -142,6 +149,7 @@ func (d *DynamoModelMapper) buildQueryDelete(r DynamoResource) (*dynamo.Delete, 
 	return query, nil
 }
 
+// CreateResource Resourceの作成
 func (d *DynamoModelMapper) CreateResource(r DynamoResource) error {
 	query, err := d.buildQueryCreate(r)
 	if err != nil {
@@ -156,6 +164,7 @@ func (d *DynamoModelMapper) CreateResource(r DynamoResource) error {
 	return nil
 }
 
+// CreateResources 複数のResourceの作成
 func (d *DynamoModelMapper) CreateResources(rs []DynamoResource) error {
 	tx, err := d.buildQueryCreates(rs)
 	if err != nil {
@@ -170,6 +179,7 @@ func (d *DynamoModelMapper) CreateResources(rs []DynamoResource) error {
 	return nil
 }
 
+// UpdateResource Resourceの更新
 func (d *DynamoModelMapper) UpdateResource(r DynamoResource) error {
 	query, err := d.buildQueryUpdate(r)
 	if err != nil {
@@ -184,6 +194,7 @@ func (d *DynamoModelMapper) UpdateResource(r DynamoResource) error {
 	return nil
 }
 
+// DeleteResource Resourceの削除
 func (d *DynamoModelMapper) DeleteResource(r DynamoResource) error {
 	query, err := d.buildQueryDelete(r)
 	if err != nil {

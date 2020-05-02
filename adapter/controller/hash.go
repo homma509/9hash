@@ -67,7 +67,7 @@ func GetHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 	return Response200(res.Hashs)
 }
 
-// PostHashs Hashの新規作成
+// PostHashs 複数Hashの新規作成
 func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// バリデーション処理
 	errs := ValidateBody(req.Body, ValidatorPostSetting)
@@ -95,6 +95,7 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 	return Response201(res.Hashs)
 }
 
+// PostHash Hashの新規作成
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// バリデーション処理
 	errs := ValidateBody(req.Body, ValidatorPutSetting)
@@ -131,6 +132,7 @@ func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	return Response200(res.Hash)
 }
 
+// DeleteHash Hashの削除
 func DeleteHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// パスパラメータからHashIDを取得する
 	id, err := strconv.ParseUint(req.PathParameters["hash_id"], 10, 64)

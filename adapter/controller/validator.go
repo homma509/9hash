@@ -41,6 +41,7 @@ func validate(params map[string]interface{}, settings []*ValidatorSetting) map[s
 	return nil
 }
 
+// ValidateBody Bodyのバリデーション
 func ValidateBody(body string, settings []*ValidatorSetting) map[string]error {
 	var b map[string]interface{}
 	err := json.Unmarshal([]byte(body), &b)
