@@ -1,6 +1,6 @@
 # Application configure
 
-service: nine-hash
+service: nine-hash-509
 
 # Specific Serverless version
 frameworkVersion: '>=1.28.0 <2.0.0'
@@ -9,21 +9,22 @@ provider:
   name: aws
   stage: ${opt:stage, 'dev'}
   runtime: go1.x
-  region: ${env:REGION_NAME}
+  region: ${env:REGION_NAME, 'ap-northeast-1'}
   iamRoleStatements:
-    - Effect: "Allow"
+    - Effect: 'Allow'
       Action:
-        - "dynamodb:*"
-      Resource: "*"
+        - 'dynamodb:*'
+      Resource: '*'
     - Effect: Allow
       Action:
-        - "logs:*"
-      Resource: "*"
+        - 'logs:*'
+      Resource: '*'
 
 custom:
   projectName: 9hash
+  bucketName: 9hash-${self:provider.stage}-web-app
   s3Sync:
-    - bucketName: ${env:BUCKET_NAME}
+    - bucketName: ${self:custom.bucketName}
       localDir: web/app/dist/
 
 resources:
@@ -50,10 +51,10 @@ resources:
       # DeletionPolicy: Retain
       Properties:
         AccessControl: Private
-        BucketName: ${env:BUCKET_NAME}
-        # Tags:
-        #   - Key: Name
-        #     Value: ${self:service}-${opt:stage}
+        BucketName: ${self:custom.bucketName}
+        Tags:
+          - Key: Name
+            Value: ${self:custom.projectName}-${self:provider.stage}
     StaticContentsS3Policy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -65,23 +66,23 @@ resources:
               Principal:
                 AWS:
                   Fn::Join:
-                    - " "
-                    - - "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity"
+                    - ' '
+                    - - 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity'
                       - Ref: StaticCloudFrontOriginAccessIdentity
               Action: s3:GetObject
               Resource:
                 Fn::Join:
-                  - "/"
+                  - '/'
                   - - Fn::GetAtt:
                         - StaticContentsS3
                         - Arn
-                    - "*"
+                    - '*'
     StaticContentsCloudFront:
       Type: AWS::CloudFront::Distribution
       Properties:
         DistributionConfig:
           Enabled: true
-          Comment: "Delivery static contents"
+          Comment: 'Delivery static contents'
           PriceClass: PriceClass_200
           DefaultRootObject: index.html
           Origins:
@@ -93,7 +94,7 @@ resources:
               S3OriginConfig:
                 OriginAccessIdentity:
                   Fn::Join:
-                    - "/"
+                    - '/'
                     - - origin-access-identity/cloudfront
                       - Ref: StaticCloudFrontOriginAccessIdentity
           DefaultCacheBehavior:
@@ -129,8 +130,8 @@ resources:
     StaticContentsCloudFrontUrl:
       Value:
         Fn::Join:
-          - ""
-          - - "https://"
+          - ''
+          - - 'https://'
             - Fn::GetAtt:
               - StaticContentsCloudFront
               - DomainName
@@ -147,21 +148,21 @@ package:
 
 functions:
   getHash:
-    name: ${self:custom.projectName}-GetHash
+    name: ${self:custom.projectName}-${self:provider.stage}-GetHash
     handler: build/api/hash/get/main
     events:
       - http:
           path: /v1/hashs/{hash_id}
           method: get
   getHashs:
-    name: ${self:custom.projectName}-GetHashs
+    name: ${self:custom.projectName}-${self:provider.stage}-GetHashs
     handler: build/api/hashs/get/main
     events:
       - http:
           path: /v1/hashs
           method: get
   postHashs:
-    name: ${self:custom.projectName}-PostHashs
+    name: ${self:custom.projectName}-${self:provider.stage}-PostHashs
     handler: build/api/hashs/post/main
     events:
       - http:
@@ -169,7 +170,7 @@ functions:
           method: post
           cors: true
   putHash:
-    name: ${self:custom.projectName}-PutHash
+    name: ${self:custom.projectName}-${self:provider.stage}-PutHash
     handler: build/api/hash/put/main
     events:
       - http:
@@ -177,7 +178,7 @@ functions:
           method: put
           cors: true
   deleteHash:
-    name: ${self:custom.projectName}-DeleteHash
+    name: ${self:custom.projectName}-${self:provider.stage}-DeleteHash
     handler: build/api/hash/delete/main
     events:
       - http:
@@ -185,7 +186,7 @@ functions:
           method: delete
           cors: true
   getURL:
-    name: ${self:custom.projectName}-GetURL
+    name: ${self:custom.projectName}-${self:provider.stage}-GetURL
     handler: build/api/url/get/main
     events:
       - http:

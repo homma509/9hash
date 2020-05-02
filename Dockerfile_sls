@@ -2,6 +2,3 @@ FROM amaysim/serverless:1.67.2
 
 WORKDIR /opt/app
 COPY . /opt/app
-
-RUN apk update && \
-    npm install

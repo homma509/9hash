@@ -11,7 +11,7 @@ services:
     security_opt:
       - seccomp:unconfined
     env_file: 
-      - .env
+      - .env.development
       - .env.dynamodb-local
     networks:
       - net
@@ -23,10 +23,11 @@ services:
     volumes: 
       - .:/opt/app
     env_file: 
-      - .env
       - .env.aws-credentials
     networks:
       - net
+    # tty:
+    #   true
 
   dynamodb:
     build:
@@ -37,7 +38,6 @@ services:
     volumes: 
       - .:/var/opt
     env_file: 
-      - .env
       - .env.dynamodb-local
     networks:
       - net
@@ -51,11 +51,11 @@ services:
     volumes: 
       - ./web/app:/usr/src/app/
     env_file: 
-      - .env
+      - ./web/app/.env
     networks:
       - net
-    tty:
-      true
+    # tty:
+    #   true
 
 networks:
   net:

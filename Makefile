@@ -32,11 +32,12 @@ package:
 	$(DOCKER) run sls sls package
 
 deploy:
-	$(DOCKER) run sls sls deploy ${ARGS}
-	# make ARGS="--stage prod" deploy
+	# make ARGS="prod" deploy
+	$(DOCKER) run sls ./scripts/deploy.sh ${ARGS}
 
 clean:
 	./scripts/clean.sh
 
 remove:
-	$(DOCKER) run sls sls remove ${ARGS}
+	# make ARGS="prod" remove
+	$(DOCKER) run sls ./scripts/remove.sh ${ARGS}
