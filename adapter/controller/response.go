@@ -7,6 +7,7 @@ import (
 	"github.com/golang/glog"
 )
 
+// Response Responseの構造体
 type Response struct {
 	Message string `json:"message"`
 }

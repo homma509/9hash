@@ -11,7 +11,7 @@ type HashGetter struct {
 	HashRepository domain.HashRepository
 }
 
-// NewHashGetter Hash取得をインスタンス生成します
+// NewHashGetter Hash取得をインスタンス生成
 func NewHashGetter(rep domain.HashRepository) *HashGetter {
 	return &HashGetter{
 		HashRepository: rep,
@@ -27,12 +27,12 @@ func (h *HashGetter) Execute(req *usecase.GetHashRequest) (*usecase.GetHashRespo
 	return &usecase.GetHashResponse{Hash: hash}, nil
 }
 
-// NewHashsGetter Hashs取得
+// HashsGetter Hashs取得
 type HashsGetter struct {
 	HashRepository domain.HashRepository
 }
 
-// NewHashsGetter Hashs取得をインスタンス生成します
+// NewHashsGetter Hashs取得をインスタンス生成
 func NewHashsGetter(rep domain.HashRepository) *HashsGetter {
 	return &HashsGetter{
 		HashRepository: rep,
@@ -53,7 +53,7 @@ type HashCreator struct {
 	HashRepository domain.HashRepository
 }
 
-// NewHashCreator Hash新規作成をインスタンス生成します
+// NewHashCreator Hash新規作成をインスタンス生成
 func NewHashCreator(rep domain.HashRepository) *HashCreator {
 	return &HashCreator{
 		HashRepository: rep,
@@ -75,7 +75,7 @@ type HashsCreator struct {
 	HashRepository domain.HashRepository
 }
 
-// NewHashsCreator Hashs新規作成をインスタンス生成します
+// NewHashsCreator Hashs新規作成をインスタンス生成
 func NewHashsCreator(rep domain.HashRepository) *HashsCreator {
 	return &HashsCreator{
 		HashRepository: rep,
@@ -97,13 +97,14 @@ type HashUpdator struct {
 	HashRepository domain.HashRepository
 }
 
-// NewHashUpdator Hash更新をインスタンス生成します
+// NewHashUpdator Hash更新をインスタンス生成
 func NewHashUpdator(rep domain.HashRepository) *HashUpdator {
 	return &HashUpdator{
 		HashRepository: rep,
 	}
 }
 
+// Execute Hashを更新
 func (h *HashUpdator) Execute(req *usecase.UpdateHashRequest) (*usecase.UpdateHashResponse, error) {
 	hash, err := h.HashRepository.UpdateHash(req.ToHashModel())
 	if err != nil {
@@ -118,13 +119,14 @@ type HashDeleter struct {
 	HashRepository domain.HashRepository
 }
 
-// NewHashDeleter Hash削除をインスタンス生成します
+// NewHashDeleter Hash削除をインスタンス生成
 func NewHashDeleter(rep domain.HashRepository) *HashDeleter {
 	return &HashDeleter{
 		HashRepository: rep,
 	}
 }
 
+// Execute Hashを削除
 func (h *HashDeleter) Execute(req *usecase.DeleteHashRequest) (*usecase.DeleteHashResponse, error) {
 	hash, err := h.HashRepository.GetHashByID(req.ID)
 	if err != nil {

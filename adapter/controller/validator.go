@@ -11,9 +11,11 @@ import (
 )
 
 var (
+	// ErrUint Uintのバリデーションエラー
 	ErrUint = validator.TextErr{Err: errors.New("invalid uint")}
 )
 
+// ValidatorSetting バリデーション設定を表した構造体
 type ValidatorSetting struct {
 	ArgName      string
 	ValidateTags string

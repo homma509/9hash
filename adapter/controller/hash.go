@@ -95,7 +95,7 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 	return Response201(res.Hashs)
 }
 
-// PostHash Hashの新規作成
+// PutHash Hashの更新
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// バリデーション処理
 	errs := ValidateBody(req.Body, ValidatorPutSetting)

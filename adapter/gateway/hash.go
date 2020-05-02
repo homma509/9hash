@@ -224,6 +224,7 @@ func (h *HashOperator) UpdateHash(m *domain.HashModel) (*domain.HashModel, error
 	return &r.HashModel, nil
 }
 
+// DeleteHash Hashの削除
 func (h *HashOperator) DeleteHash(m *domain.HashModel) error {
 	r := NewHashResource(m, h.Mapper)
 

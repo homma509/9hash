@@ -69,7 +69,7 @@ type CreateHashsResponse struct {
 	Hashs []*domain.HashModel
 }
 
-// ToHashsModel Hashs新規作成RequestをHashモデル配列に変換します
+// ToHashsModel Hashs新規作成RequestをHashモデル配列への変換
 func (h *CreateHashsRequest) ToHashsModel() []*domain.HashModel {
 	hashs := make([]*domain.HashModel, len(h.Values))
 	for i, value := range h.Values {
@@ -95,6 +95,7 @@ type UpdateHashResponse struct {
 	Hash *domain.HashModel
 }
 
+// ToHashModel Hash更新RequestをHashモデルへ変換
 func (h *UpdateHashRequest) ToHashModel() *domain.HashModel {
 	return &domain.HashModel{
 		ID:    h.ID,
@@ -116,6 +117,7 @@ type DeleteHashRequest struct {
 type DeleteHashResponse struct {
 }
 
+// ToHashModel Hash削除RequestをHashモデルへ変換
 func (h *DeleteHashRequest) ToHashModel() *domain.HashModel {
 	return &domain.HashModel{
 		ID: h.ID,

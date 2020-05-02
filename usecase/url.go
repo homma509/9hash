@@ -10,6 +10,7 @@ type GetURLRequest struct {
 	Key string
 }
 
+// GetURLResponse URL取得Response
 type GetURLResponse struct {
 	URL string
 }
