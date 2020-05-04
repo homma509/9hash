@@ -36,3 +36,13 @@ func NewResourceTableOperator(client *DynamoClient, tableName string) *ResourceT
 		TableOperator: *NewTableOperator(client, tableName),
 	}
 }
+
+// CreateTestTable テスト用テーブルの作成
+func (r *ResourceTableOperator) CreateTestTable() error {
+	return r.TableOperator.CreateTestTable(&DynamoResourceSchema{})
+}
+
+// DropTable テーブルの削除
+func (r *ResourceTableOperator) DropTable() error {
+	return r.TableOperator.DropTable()
+}

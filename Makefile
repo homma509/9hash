@@ -13,6 +13,9 @@ go-lint:
 go-build:
 	$(DOCKER) run go ./scripts/go-build.sh
 
+go-test:
+	${DOCKER} run go ./scripts/go-test.sh '${PACKAGE}' '${ARGS}'
+
 npm-serve:
 	$(DOCKER) run --service-ports npm npm run serve
 

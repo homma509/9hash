@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/guregu/dynamo"
 	"github.com/pkg/errors"
 )
@@ -40,4 +41,36 @@ func (c *DynamoClient) ConnectTable(tableName string) (*dynamo.Table, error) {
 	table := db.Table(tableName)
 
 	return &table, nil
+}
+
+// CreateTestTable テスト用テーブルの作成
+func (c *DynamoClient) CreateTestTable(tableName string, table interface{}) error {
+	db, err := c.Connect()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	err = db.CreateTable(tableName, table).Run()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
+}
+
+// DropTable テーブルの削除
+func (c *DynamoClient) DropTable(tableName string) error {
+	db, err := c.Connect()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	_, err = db.Client().DeleteTable(&dynamodb.DeleteTableInput{
+		TableName: aws.String(tableName),
+	})
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }

@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# For this issue https://github.com/docker/compose/issues/4076 (Probably)
-sleep 1
-
 echo "--------------"
 echo "Running go vet & golint."
 echo

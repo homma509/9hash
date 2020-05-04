@@ -25,3 +25,13 @@ func (o *TableOperator) ConnectDB() (*dynamo.DB, error) {
 func (o *TableOperator) ConnectTable() (*dynamo.Table, error) {
 	return o.Client.ConnectTable(o.TableName)
 }
+
+// CreateTestTable テスト用テーブルの作成
+func (o *TableOperator) CreateTestTable(schema interface{}) error {
+	return o.Client.CreateTestTable(o.TableName, schema)
+}
+
+// DropTable テーブルの削除
+func (o *TableOperator) DropTable() error {
+	return o.Client.DropTable(o.TableName)
+}
