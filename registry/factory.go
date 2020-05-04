@@ -49,9 +49,9 @@ func (f *Factory) BuildDynamoClient() *db.DynamoClient {
 		config := &aws.Config{
 			Region: aws.String(f.Envs.RegionName()),
 		}
-		if f.Envs.DynamoLocalEndpoint() != "" {
+		if f.Envs.DynamoDBLocalEndpoint() != "" {
 			config.Credentials = credentials.NewStaticCredentials("dummy_id", "dummy_secret", "dymmy_token")
-			config.Endpoint = aws.String(f.Envs.DynamoLocalEndpoint())
+			config.Endpoint = aws.String(f.Envs.DynamoDBLocalEndpoint())
 		}
 		return db.NewClient(config)
 	}).(*db.DynamoClient)

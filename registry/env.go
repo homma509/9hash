@@ -23,9 +23,9 @@ func (e *Envs) env(key string) string {
 	return os.Getenv(key)
 }
 
-// DynamoLocalEndpoint DynamoDBのローカルEndpoint
-func (e *Envs) DynamoLocalEndpoint() string {
-	return e.env("DYNAMO_LOCAL_ENDPOINT")
+// DynamoDBLocalEndpoint DynamoDBのローカルEndpoint
+func (e *Envs) DynamoDBLocalEndpoint() string {
+	return e.env("DYNAMODB_LOCAL_ENDPOINT")
 }
 
 // DynamoTableName DynamoDBのテーブル名
