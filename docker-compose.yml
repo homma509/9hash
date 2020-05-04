@@ -26,8 +26,8 @@ services:
       - .env.aws-credentials
     networks:
       - net
-    # tty:
-    #   true
+    tty:
+      true
 
   dynamodb:
     build:

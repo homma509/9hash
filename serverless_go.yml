@@ -1,0 +1,100 @@
+# Application configure
+
+service: nine-hash-509
+
+# Specific Serverless version
+frameworkVersion: '>=1.28.0 <2.0.0'
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  runtime: go1.x
+  region: ${env:REGION_NAME, 'ap-northeast-1'}
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'dynamodb:*'
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - 'logs:*'
+      Resource: '*'
+
+custom:
+  projectName: 9hash
+
+resources:
+  Resources:
+    ResourceTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${env:DYNAMO_TABLE_NAME}
+
+plugins:
+  - serverless-dotenv-plugin
+
+package:
+  exclude:
+    - ./**
+  include:
+    - ./build/**
+
+functions:
+  getHash:
+    name: ${self:custom.projectName}-${self:provider.stage}-GetHash
+    handler: build/api/hash/get/main
+    events:
+      - http:
+          path: /v1/hashs/{hash_id}
+          method: get
+  getHashs:
+    name: ${self:custom.projectName}-${self:provider.stage}-GetHashs
+    handler: build/api/hashs/get/main
+    events:
+      - http:
+          path: /v1/hashs
+          method: get
+  postHashs:
+    name: ${self:custom.projectName}-${self:provider.stage}-PostHashs
+    handler: build/api/hashs/post/main
+    events:
+      - http:
+          path: /v1/hashs
+          method: post
+          cors: true
+  putHash:
+    name: ${self:custom.projectName}-${self:provider.stage}-PutHash
+    handler: build/api/hash/put/main
+    events:
+      - http:
+          path: /v1/hashs/{hash_id}
+          method: put
+          cors: true
+  deleteHash:
+    name: ${self:custom.projectName}-${self:provider.stage}-DeleteHash
+    handler: build/api/hash/delete/main
+    events:
+      - http:
+          path: /v1/hashs/{hash_id}
+          method: delete
+          cors: true
+  getURL:
+    name: ${self:custom.projectName}-${self:provider.stage}-GetURL
+    handler: build/api/url/get/main
+    events:
+      - http:
+          path: /v1/url/{key}
+          method: get

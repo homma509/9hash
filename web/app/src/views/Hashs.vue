@@ -11,7 +11,7 @@
           <ion-label>
             <ion-router-link
               target="_blank"
-              :href="`${baseUrl}url/${hash.Key}`"
+              :href="`${baseUrl}/url/${hash.Key}`"
               >{{ hash.Key }}</ion-router-link
             >
           </ion-label>
@@ -46,7 +46,7 @@ export default {
       console.log(baseUrl);
       if (this.$route.fullPath == "/hashs") {
         try {
-          const response = await axios.get(`${baseUrl}hashs`);
+          const response = await axios.get(`${baseUrl}/hashs`);
           this.hashs = response.data;
         } catch (e) {
           console.log(e);
@@ -55,7 +55,7 @@ export default {
     },
     async deleteHash(id) {
       try {
-        await axios.delete(`${baseUrl}hashs/${id}`);
+        await axios.delete(`${baseUrl}/hashs/${id}`);
       } catch (e) {
         console.log(e);
       }

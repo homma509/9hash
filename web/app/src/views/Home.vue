@@ -33,7 +33,7 @@ export default {
   methods: {
     async onClick() {
       try {
-        const response = await axios.post(`${baseUrl}hashs`, {
+        const response = await axios.post(`${baseUrl}/hashs`, {
           values: this.URLs.split("\n").filter(URL => URL.length > 0)
         });
         console.log(response.data);

@@ -19,4 +19,5 @@ elif [ $# -eq 1 ]; then
     esac
 fi
 
-sls remove --env $ENV --stage $STAGE
+sls remove --env $ENV --stage $STAGE --config serverless_go.yml
+sls remove --env $ENV --stage $STAGE --config serverless_npm.yml

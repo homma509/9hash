@@ -2,10 +2,12 @@
 
 npm install
 
-if [ $# -eq 0 ]; then
-    ENV="development"
-    STAGE="dev"
-elif [ $# -eq 1 ]; then
+ENV="development"
+STAGE="dev"
+BACKEND=TRUE
+
+while [ $# -gt 0 ]
+do
     case "$1" in
         "dev" ) ENV="development"
                 STAGE="dev"
@@ -16,7 +18,16 @@ elif [ $# -eq 1 ]; then
         "prod" ) ENV="production"
                  STAGE="prod"
                  ;;
+        "frontend" ) BACKEND=FALSE
+                     ;;
     esac
-fi
+    shift
+done
 
-sls deploy --env $ENV --stage $STAGE
+if [ $BACKEND = TRUE ]; then
+    sls deploy --env $ENV --stage $STAGE --config serverless_go.yml
+    API_URL=$(sls info --stage $STAGE --config serverless_go.yml --verbose | sed -n -r 's/^.*ServiceEndpoint: (.+)/\1/p')
+    echo -n -e "NODE_ENV=$ENV\nVUE_APP_API_BASE_URL=$API_URL/v1" > ./web/app/.env
+else
+    sls deploy --env $ENV --stage $STAGE --config serverless_npm.yml
+fi

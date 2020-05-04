@@ -32,12 +32,14 @@ package:
 	$(DOCKER) run sls sls package
 
 deploy:
+	$(DOCKER) run sls ./scripts/deploy.sh backend ${ARGS}
+	$(DOCKER) run npm npm run build
+	$(DOCKER) run sls ./scripts/deploy.sh frontend ${ARGS}
 	# make ARGS="prod" deploy
-	$(DOCKER) run sls ./scripts/deploy.sh ${ARGS}
 
 clean:
 	./scripts/clean.sh
 
 remove:
-	# make ARGS="prod" remove
 	$(DOCKER) run sls ./scripts/remove.sh ${ARGS}
+	# make ARGS="prod" remove
