@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -140,6 +141,76 @@ func TestGetHashErr(t *testing.T) {
 			// レスポンスメッセージの確認
 			if tc.want["message"] != resBody["message"] {
 				t.Errorf("Response Body message is not equal(want=%s, actual=%v)", tc.want["message"], resBody["message"])
+			}
+		})
+	}
+}
+
+// TestGetHashs GetHashsAPI OKテストケース
+func TestGetHashs(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+		req    []*domain.HashModel
+	}{
+		{
+			"正常ケース: 200",
+			GetHashs,
+			200,
+			[]*domain.HashModel{
+				{
+					Value: "http://test1.example.com",
+				},
+				{
+					Value: "http://test2.example.com",
+				},
+			},
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// モックデータを作成
+			hashs, err := table.HashOperator.CreateHashs(tc.req)
+
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// レスポンスBodyをモデルへ変換
+			var hs []*domain.HashModel
+			err = json.Unmarshal([]byte(res.Body), &hs)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// モデルをソート
+			sort.Slice(hashs, func(i, j int) bool { return hashs[i].ID < hashs[j].ID })
+			sort.Slice(hs, func(i, j int) bool { return hs[i].ID < hs[j].ID })
+
+			// レスポンスデータの確認
+			for i, hash := range hashs {
+				if hash.ID != hs[i].ID {
+					t.Errorf("ID is wrong(want=%d, actual=%d)", hash.ID, hs[i].ID)
+				}
+				if hash.Key != hs[i].Key {
+					t.Errorf("Key is wrong(want=%s, actual=%s)", hash.Key, hs[i].Key)
+				}
+				if hash.Value != hs[i].Value {
+					t.Errorf("Value is wrong(want=%s, actual=%s)", hash.Value, hs[i].Value)
+				}
 			}
 		})
 	}
