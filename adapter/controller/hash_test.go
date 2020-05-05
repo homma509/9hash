@@ -75,7 +75,6 @@ func TestGetHash(t *testing.T) {
 			if hash.Value != h.Value {
 				t.Errorf("Value is wrong(want=%s, actual=%s)", hash.Value, h.Value)
 			}
-
 		})
 	}
 }
@@ -288,7 +287,6 @@ func TestPostHashs(t *testing.T) {
 					t.Errorf("Value is wrong(want=%s, actual=%s)", hash.Value, h.Value)
 				}
 			}
-
 		})
 	}
 }
@@ -358,6 +356,79 @@ func TestPostHashsErr(t *testing.T) {
 			// レスポンスエラーの確認
 			if !reflect.DeepEqual(tc.want["errors"], resBody["errors"]) {
 				t.Errorf("Response Body errors is not equal(want=%v, actual=%v)", tc.want["errors"], resBody["errors"])
+			}
+		})
+	}
+}
+
+// TestPutHash PutHashAPI OKテストケース
+func TestPutHash(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+		req    *domain.HashModel
+		want   map[string]interface{}
+	}{
+		{
+			"正常ケース: 200",
+			PutHash,
+			200,
+			&domain.HashModel{
+				Value: "http://test.example.com",
+			},
+			map[string]interface{}{
+				"value": "http://test_update.example.com",
+			},
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// モックデータを作成
+			hash, err := table.HashOperator.CreateHash(tc.req)
+
+			// リクエストMapをJSONに変換
+			req, err := json.Marshal(tc.want)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{
+				PathParameters: map[string]string{
+					"hash_id": fmt.Sprintf("%d", hash.ID),
+				},
+				Body: string(req),
+			})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// DynamoDBのデータを取得
+			h, err := table.HashOperator.GetHashByID(hash.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// データの確認
+			if hash.ID != h.ID {
+				t.Errorf("ID is wrong(want=%d, actual=%d)", hash.ID, h.ID)
+			}
+			if hash.Key != h.Key {
+				t.Errorf("Key is wrong(want=%s, actual=%s)", hash.Key, h.Key)
+			}
+			if tc.want["value"] != h.Value {
+				t.Errorf("Value is wrong(want=%s, actual=%s)", tc.want["value"], h.Value)
 			}
 		})
 	}
