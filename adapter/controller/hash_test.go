@@ -94,22 +94,21 @@ func TestGetHashErr(t *testing.T) {
 		want   map[string]interface{}
 	}{
 		{
-			"異常ケース: 500(IDの未入力)",
-			GetHash,
-			500,
-			"",
-			map[string]interface{}{
-				"message": "サーバエラーが発生しました。",
-				"errors":  nil,
-			},
-		},
-		{
 			"異常ケース: 404(存在しないIDの取得)",
 			GetHash,
 			404,
 			"1",
 			map[string]interface{}{
 				"message": "結果が見つかりません。",
+			},
+		},
+		{
+			"異常ケース: 500(IDの未入力)",
+			GetHash,
+			500,
+			"",
+			map[string]interface{}{
+				"message": "サーバエラーが発生しました。",
 			},
 		},
 	}
@@ -372,15 +371,15 @@ func TestPutHash(t *testing.T) {
 		name   string
 		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 		status int
-		req    *domain.HashModel
+		req    map[string]interface{}
 		want   map[string]interface{}
 	}{
 		{
 			"正常ケース: 200",
 			PutHash,
 			200,
-			&domain.HashModel{
-				Value: "http://test.example.com",
+			map[string]interface{}{
+				"value": "http://test_update.example.com",
 			},
 			map[string]interface{}{
 				"value": "http://test_update.example.com",
@@ -393,10 +392,12 @@ func TestPutHash(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// モックデータを作成
-			hash, err := table.HashOperator.CreateHash(tc.req)
+			hash, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Value: "test.example.com",
+			})
 
 			// リクエストMapをJSONに変換
-			req, err := json.Marshal(tc.want)
+			req, err := json.Marshal(tc.req)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -429,6 +430,237 @@ func TestPutHash(t *testing.T) {
 			}
 			if tc.want["value"] != h.Value {
 				t.Errorf("Value is wrong(want=%s, actual=%s)", tc.want["value"], h.Value)
+			}
+		})
+	}
+}
+
+// TestPutHashErr PutHash BadRequestテストケース
+func TestPutHashErr(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+		req    map[string]interface{}
+		want   map[string]interface{}
+	}{
+		{
+			"異常ケース: 400(valueの未入力)",
+			PutHash,
+			400,
+			map[string]interface{}{
+				"hash_id": "1",
+				"value":   "",
+			},
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"value": "値を入力してください。",
+				},
+			},
+		},
+		{
+			"異常ケース: 404(存在しないIDを更新)",
+			PutHash,
+			404,
+			map[string]interface{}{
+				"hash_id": "999",
+				"value":   "test_update.example.com",
+			},
+			map[string]interface{}{
+				"message": "結果が見つかりません。",
+			},
+		},
+		{
+			"異常ケース: 500(不正なID)",
+			PutHash,
+			500,
+			map[string]interface{}{
+				"hash_id": "dummy",
+				"value":   "test_update.example.com",
+			},
+			map[string]interface{}{
+				"message": "サーバエラーが発生しました。",
+			},
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// モックデータを作成
+			_, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Value: "test.example.com",
+			})
+
+			// リクエストMapをJSONに変換
+			req, err := json.Marshal(tc.req)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{
+				PathParameters: map[string]string{
+					"hash_id": fmt.Sprintf("%v", tc.req["hash_id"]),
+				},
+				Body: string(req),
+			})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// レスポンスBodyをMapへ変換
+			var resBody map[string]interface{}
+			err = json.Unmarshal([]byte(res.Body), &resBody)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// レスポンスメッセージの確認
+			if tc.want["message"] != resBody["message"] {
+				t.Errorf("Response Body message is not equal(want=%s, actual=%v)", tc.want["message"], resBody["message"])
+			}
+
+			// レスポンスエラーの確認
+			if _, ok := tc.want["errors"]; ok {
+				if !reflect.DeepEqual(tc.want["errors"], resBody["errors"]) {
+					t.Errorf("Response Body errors is not equal(want=%v, actual=%v)", tc.want["errors"], resBody["errors"])
+				}
+			}
+		})
+	}
+}
+
+// TestDeleteHash DeleteHashAPI OKテストケース
+func TestDeleteHash(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+	}{
+		{
+			"正常ケース: 200",
+			DeleteHash,
+			200,
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// モックデータを作成
+			hash, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Value: "test.example.com",
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{
+				PathParameters: map[string]string{
+					"hash_id": fmt.Sprintf("%d", hash.ID),
+				},
+			})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// DynamoDBのデータを取得
+			h, _ := table.HashOperator.GetHashByID(hash.ID)
+			if h != nil {
+				t.Errorf("Hash Data not delted(ID=%d)", h.ID)
+			}
+		})
+	}
+}
+
+// TestDeleteHashErr DeleteHash BadRequestテストケース
+func TestDeleteHashErr(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+		req    map[string]interface{}
+		want   map[string]interface{}
+	}{
+		{
+			"異常ケース: 404(存在しないIDを削除)",
+			DeleteHash,
+			404,
+			map[string]interface{}{
+				"hash_id": "999",
+			},
+			map[string]interface{}{
+				"message": "結果が見つかりません。",
+			},
+		},
+		{
+			"異常ケース: 500(不正なID)",
+			DeleteHash,
+			500,
+			map[string]interface{}{
+				"hash_id": "dummy",
+			},
+			map[string]interface{}{
+				"message": "サーバエラーが発生しました。",
+			},
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// モックデータを作成
+			_, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Value: "test.example.com",
+			})
+
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{
+				PathParameters: map[string]string{
+					"hash_id": fmt.Sprintf("%v", tc.req["hash_id"]),
+				},
+			})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// レスポンスBodyをMapへ変換
+			var resBody map[string]interface{}
+			err = json.Unmarshal([]byte(res.Body), &resBody)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// レスポンスメッセージの確認
+			if tc.want["message"] != resBody["message"] {
+				t.Errorf("Response Body message is not equal(want=%s, actual=%v)", tc.want["message"], resBody["message"])
 			}
 		})
 	}
