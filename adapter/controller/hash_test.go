@@ -11,8 +11,142 @@ import (
 	"github.com/homma509/9hash/mocks"
 )
 
-// TestPostHashs_201 PostHashsAPI OKテストケース
-func TestPostHashs_201(t *testing.T) {
+// TestGetHash GetHashAPI OKテストケース
+func TestGetHash(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+		req    *domain.HashModel
+		want   map[string]interface{}
+	}{
+		{
+			"正常ケース: 200",
+			GetHash,
+			200,
+			&domain.HashModel{
+				Value: "http://test.example.com",
+			},
+			map[string]interface{}{
+				"value": "http://test.example.com",
+			},
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// モックデータを作成
+			hash, err := table.HashOperator.CreateHash(tc.req)
+
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{
+				PathParameters: map[string]string{
+					"hash_id": fmt.Sprintf("%d", hash.ID),
+				},
+			})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// レスポンスBodyをモデルへ変換
+			var h *domain.HashModel
+			err = json.Unmarshal([]byte(res.Body), &h)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// レスポンスデータの確認
+			if hash.ID != h.ID {
+				t.Errorf("ID is wrong(want=%d, actual=%d)", hash.ID, h.ID)
+			}
+			if hash.Key != h.Key {
+				t.Errorf("Key is wrong(want=%s, actual=%s)", hash.Key, h.Key)
+			}
+			if hash.Value != h.Value {
+				t.Errorf("Value is wrong(want=%s, actual=%s)", hash.Value, h.Value)
+			}
+
+		})
+	}
+}
+
+// TestGetHashErr GetHashAPI BadRequestテストケース
+func TestGetHashErr(t *testing.T) {
+	// テスト用のDynamoDBを設定
+	table := mocks.SetupDB(t)
+	defer table.Cleanup()
+
+	// テストケース
+	tests := []struct {
+		name   string
+		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
+		status int
+		req    string
+		want   map[string]interface{}
+	}{
+		{
+			"異常ケース: 500(IDの未入力)",
+			GetHash,
+			500,
+			"",
+			map[string]interface{}{
+				"message": "サーバエラーが発生しました。",
+				"errors":  nil,
+			},
+		},
+		{
+			"異常ケース: 404(存在しないIDの取得)",
+			GetHash,
+			404,
+			"1",
+			map[string]interface{}{
+				"message": "結果が見つかりません。",
+			},
+		},
+	}
+
+	// テストケースの実行
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// APIの実行
+			res := tc.api(events.APIGatewayProxyRequest{
+				PathParameters: map[string]string{
+					"hash_id": tc.req,
+				},
+			})
+
+			// レスポンスStatusCodeの確認
+			if res.StatusCode != tc.status {
+				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
+			}
+
+			// レスポンスBodyをMapへ変換
+			var resBody map[string]interface{}
+			err := json.Unmarshal([]byte(res.Body), &resBody)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// レスポンスメッセージの確認
+			if tc.want["message"] != resBody["message"] {
+				t.Errorf("Response Body message is not equal(want=%s, actual=%v)", tc.want["message"], resBody["message"])
+			}
+		})
+	}
+}
+
+// TestPostHashs PostHashsAPI OKテストケース
+func TestPostHashs(t *testing.T) {
 	// テスト用のDynamoDBを設定
 	table := mocks.SetupDB(t)
 	defer table.Cleanup()
@@ -26,7 +160,7 @@ func TestPostHashs_201(t *testing.T) {
 		want   []map[string]interface{}
 	}{
 		{
-			"正常ケース",
+			"正常ケース: 201",
 			PostHashs,
 			201,
 			map[string]interface{}{
@@ -88,8 +222,8 @@ func TestPostHashs_201(t *testing.T) {
 	}
 }
 
-// TestPostHashs_400 PostHashs BadRequestテストケース
-func TestPostHashs_400(t *testing.T) {
+// TestPostHashsErr PostHashs BadRequestテストケース
+func TestPostHashsErr(t *testing.T) {
 	// テスト用のDynamoDBを設定
 	table := mocks.SetupDB(t)
 	defer table.Cleanup()
@@ -103,7 +237,7 @@ func TestPostHashs_400(t *testing.T) {
 		want   map[string]interface{}
 	}{
 		{
-			"異常ケース: values 未入力",
+			"異常ケース: 400(valuesの未入力)",
 			PostHashs,
 			400,
 			map[string]interface{}{
@@ -154,75 +288,6 @@ func TestPostHashs_400(t *testing.T) {
 			if !reflect.DeepEqual(tc.want["errors"], resBody["errors"]) {
 				t.Errorf("Response Body errors is not equal(want=%v, actual=%v)", tc.want["errors"], resBody["errors"])
 			}
-		})
-	}
-}
-
-// TestGetHash_200 GetHashAPI OKテストケース
-func TestGetHash_200(t *testing.T) {
-	// テスト用のDynamoDBを設定
-	table := mocks.SetupDB(t)
-	defer table.Cleanup()
-
-	// テストケース
-	tests := []struct {
-		name   string
-		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
-		status int
-		req    *domain.HashModel
-		// req    map[string]interface{}
-		want map[string]interface{}
-	}{
-		{
-			"正常ケース",
-			GetHash,
-			200,
-			&domain.HashModel{
-				Value: "http://test.example.com",
-			},
-			map[string]interface{}{
-				"value": "http://test.example.com",
-			},
-		},
-	}
-
-	// テストケースの実行
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			// モックデータを作成
-			hash, err := table.HashOperator.CreateHash(tc.req)
-
-			// APIの実行
-			res := tc.api(events.APIGatewayProxyRequest{
-				PathParameters: map[string]string{
-					"hash_id": fmt.Sprintf("%d", hash.ID),
-				},
-			})
-
-			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
-				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
-			}
-
-			// レスポンスBodyをモデルへ変換
-			var h *domain.HashModel
-			err = json.Unmarshal([]byte(res.Body), &h)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// レスポンスデータの確認
-			if hash.ID != h.ID {
-				t.Errorf("ID is wrong(want=%d, actual=%d)", hash.ID, h.ID)
-			}
-			if hash.Key != h.Key {
-				t.Errorf("Key is wrong(want=%s, actual=%s)", hash.Key, h.Key)
-			}
-			if hash.Value != h.Value {
-				t.Errorf("Value is wrong(want=%s, actual=%s)", hash.Value, h.Value)
-			}
-
 		})
 	}
 }
