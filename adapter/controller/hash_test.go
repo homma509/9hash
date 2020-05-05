@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/homma509/9hash/domain"
 	"github.com/homma509/9hash/mocks"
 )
 
@@ -30,7 +31,30 @@ func TestPostHashs_201(t *testing.T) {
 	res := PostHashs(events.APIGatewayProxyRequest{
 		Body: string(req),
 	})
+
+	// ステータスコードの確認
 	if res.StatusCode != 201 {
 		t.Errorf("PostHashs of StatusCode is wrong(expected=%d, actual=%d)", 201, res.StatusCode)
+	}
+
+	// 作成データを構造体に変換
+	var hs []*domain.HashModel
+	err = json.Unmarshal([]byte(res.Body), &hs)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// データの確認
+	for _, h := range hs {
+		hash, err := table.HashOperator.GetHashByID(h.ID)
+		if err != nil {
+			t.Errorf("PostHash of Data is not found(ID = %d)", h.ID)
+		}
+		if h.Key != hash.Key {
+			t.Errorf("PostHash of Key is wrong(expected=%s, actual=%s)", h.Key, hash.Key)
+		}
+		if h.Value != hash.Value {
+			t.Errorf("PostHash of Value is wrong(expected=%s, actual=%s)", h.Value, hash.Value)
+		}
 	}
 }
