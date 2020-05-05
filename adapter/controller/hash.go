@@ -51,7 +51,7 @@ func GetHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	}
 
 	// 200レスポンス
-	return Response200(res)
+	return Response200(res.Hash)
 }
 
 // GetHashs Hashsの取得
