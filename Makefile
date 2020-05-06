@@ -14,7 +14,8 @@ go-build:
 	$(DOCKER) run go ./scripts/go-build.sh
 
 go-test:
-	${DOCKER} run go ./scripts/go-test.sh '${PACKAGE}' '${ARGS}'
+	# usage make go-test PACKAGE=adapter/controller ARGS="--run TestGetHash"
+	${DOCKER} run go ./scripts/go-test.sh ${PACKAGE} "${ARGS}"
 
 npm-serve:
 	$(DOCKER) run --service-ports npm npm run serve
@@ -35,14 +36,14 @@ package:
 	$(DOCKER) run sls sls package
 
 deploy:
+	# usage make deploy ARGS=prod # ARGS default dev
 	$(DOCKER) run sls ./scripts/deploy.sh backend ${ARGS}
 	$(DOCKER) run npm npm run build
 	$(DOCKER) run sls ./scripts/deploy.sh frontend ${ARGS}
-	# make ARGS="prod" deploy
 
 clean:
 	./scripts/clean.sh
 
 remove:
+	# usage make remove ARGS=prod # ARGS default dev
 	$(DOCKER) run sls ./scripts/remove.sh ${ARGS}
-	# make ARGS="prod" remove

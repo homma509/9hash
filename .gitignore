@@ -13,3 +13,6 @@ node_modules
 
 # go build files
 build
+
+# test ceverage files
+test/cover
