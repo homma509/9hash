@@ -45,7 +45,7 @@ export default {
     },
     toCSV: function(data) {
       try {
-        var csv = "短縮URL,URL\n";
+        let csv = "短縮URL,URL\n";
         data.forEach(element => {
           var line;
           line = baseUrl + "url/" + element["Key"];
@@ -54,8 +54,9 @@ export default {
         });
         let blob = new Blob([csv], { type: "text/csv" });
         let link = document.createElement("a");
+        let d = new Date();
         link.href = window.URL.createObjectURL(blob);
-        link.download = "URL.csv";
+        link.download = "URL_" + d.toJSON() + ".csv";
         link.click();
       } catch (e) {
         console.log(e);

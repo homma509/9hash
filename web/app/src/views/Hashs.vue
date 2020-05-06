@@ -63,17 +63,18 @@ export default {
     },
     async onClick() {
       try {
-        var csv = "短縮URL,URL\n";
+        let csv = "短縮URL,URL\n";
         this.hashs.forEach(element => {
-          var line;
+          let line;
           line = baseUrl + "url/" + element["Key"];
           line += "," + element["Value"] + "\n";
           csv += line;
         });
         let blob = new Blob([csv], { type: "text/csv" });
         let link = document.createElement("a");
+        let d = new Date();
         link.href = window.URL.createObjectURL(blob);
-        link.download = "URL.csv";
+        link.download = "URL_" + d.toJSON() + ".csv";
         link.click();
       } catch (e) {
         console.log(e);
