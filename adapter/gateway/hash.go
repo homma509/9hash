@@ -230,9 +230,6 @@ func (h *HashOperator) DeleteHash(m *domain.HashModel) error {
 
 	err := h.Mapper.DeleteResource(r)
 	if err != nil {
-		if err.Error() == dynamo.ErrNotFound.Error() {
-			return errors.WithStack(domain.ErrNotFound)
-		}
 		return errors.WithStack(err)
 	}
 

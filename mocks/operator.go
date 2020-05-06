@@ -46,8 +46,5 @@ func generateRandomTableName(t *testing.T) string {
 		t.Fatal(err)
 	}
 	l := length / 2
-	if length%2 == 1 {
-		l++
-	}
 	return fmt.Sprintf("%x", buf[:l])
 }

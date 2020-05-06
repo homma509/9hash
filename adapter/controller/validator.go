@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
-	"strconv"
 
-	"github.com/golang/glog"
 	"gopkg.in/validator.v2"
 )
 
@@ -23,7 +21,7 @@ type ValidatorSetting struct {
 
 func init() {
 	validator.SetValidationFunc("required", requiredValidator)
-	validator.SetValidationFunc("uint", uintValidator)
+	// validator.SetValidationFunc("uint", uintValidator)
 }
 
 func validate(params map[string]interface{}, settings []*ValidatorSetting) map[string]error {
@@ -79,39 +77,39 @@ func requiredValidator(v interface{}, param string) error {
 	return nil
 }
 
-func uintValidator(v interface{}, param string) error {
-	if v == nil {
-		return nil
-	}
+// func uintValidator(v interface{}, param string) error {
+// 	if v == nil {
+// 		return nil
+// 	}
 
-	s := reflect.ValueOf(v)
+// 	s := reflect.ValueOf(v)
 
-	if s.String() == "" {
-		return nil
-	}
+// 	if s.String() == "" {
+// 		return nil
+// 	}
 
-	var n int
+// 	var n int
 
-	switch s.Kind() {
-	case reflect.String:
-		n64, err := strconv.ParseInt(s.String(), 10, 64)
-		if err != nil {
-			glog.Warningf("%s:%s", param, err.Error())
-			return validator.ErrUnsupported
-		}
-		n = int(n64)
-	case reflect.Int:
-		n = v.(int)
-	case reflect.Float64:
-		n = int(v.(float64))
-	default:
-		glog.Warningf("%s:%s", param, s.Kind())
-		return validator.ErrUnsupported
-	}
+// 	switch s.Kind() {
+// 	case reflect.String:
+// 		n64, err := strconv.ParseInt(s.String(), 10, 64)
+// 		if err != nil {
+// 			glog.Warningf("%s:%s", param, err.Error())
+// 			return validator.ErrUnsupported
+// 		}
+// 		n = int(n64)
+// 	case reflect.Int:
+// 		n = v.(int)
+// 	case reflect.Float64:
+// 		n = int(v.(float64))
+// 	default:
+// 		glog.Warningf("%s:%s", param, s.Kind())
+// 		return validator.ErrUnsupported
+// 	}
 
-	if n < 0 {
-		return ErrUint
-	}
+// 	if n < 0 {
+// 		return ErrUint
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

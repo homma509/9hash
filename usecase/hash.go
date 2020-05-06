@@ -34,26 +34,6 @@ type GetHashsResponse struct {
 	Hashs []*domain.HashModel
 }
 
-// ICreateHash Hash新規作成UseCase
-type ICreateHash interface {
-	Execute(req *CreateHashRequest) (*CreateHashResponse, error)
-}
-
-// CreateHashRequest Hash新規作成Request
-type CreateHashRequest struct {
-	Value string
-}
-
-// CreateHashResponse Hash新規作成Response
-type CreateHashResponse struct {
-	Hash *domain.HashModel
-}
-
-// ToHashModel Hash新規作成RequestをHashモデルに変換します
-func (h *CreateHashRequest) ToHashModel() *domain.HashModel {
-	return domain.NewHashModel(hashKey(), h.Value)
-}
-
 // ICreateHashs Hashs新規作成UseCase
 type ICreateHashs interface {
 	Execute(req *CreateHashsRequest) (*CreateHashsResponse, error)
@@ -115,13 +95,6 @@ type DeleteHashRequest struct {
 
 // DeleteHashResponse Hash削除Response
 type DeleteHashResponse struct {
-}
-
-// ToHashModel Hash削除RequestをHashモデルへ変換
-func (h *DeleteHashRequest) ToHashModel() *domain.HashModel {
-	return &domain.HashModel{
-		ID: h.ID,
-	}
 }
 
 func hashKey() string {

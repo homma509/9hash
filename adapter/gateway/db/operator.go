@@ -16,11 +16,6 @@ func NewTableOperator(client *DynamoClient, tableName string) *TableOperator {
 	}
 }
 
-// ConnectDB DBの接続
-func (o *TableOperator) ConnectDB() (*dynamo.DB, error) {
-	return o.Client.Connect()
-}
-
 // ConnectTable テーブルへの接続
 func (o *TableOperator) ConnectTable() (*dynamo.Table, error) {
 	return o.Client.ConnectTable(o.TableName)
