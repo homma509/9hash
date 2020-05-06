@@ -52,7 +52,8 @@ export default {
           line += "," + element["Value"] + "\n";
           csv += line;
         });
-        let blob = new Blob([csv], { type: "text/csv" });
+        let bom  = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        let blob = new Blob([bom, csv], { type: "text/csv" });
         let link = document.createElement("a");
         let d = new Date();
         link.href = window.URL.createObjectURL(blob);
