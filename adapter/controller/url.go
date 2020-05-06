@@ -11,6 +11,9 @@ import (
 func GetURL(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	// パスパラメータからKeyを取得する
 	key := req.PathParameters["key"]
+	if key == "" {
+		return Response500(domain.ErrBadRequest)
+	}
 
 	// 取得処理
 	getter := registry.GetFactory().BuildGetURL()

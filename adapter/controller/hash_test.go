@@ -23,15 +23,16 @@ func TestGetHash(t *testing.T) {
 		name   string
 		api    func(events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 		status int
-		req    *domain.HashModel
+		req    map[string]interface{}
 		want   map[string]interface{}
 	}{
 		{
 			"正常ケース: 200",
 			GetHash,
 			200,
-			&domain.HashModel{
-				Value: "http://test.example.com",
+			map[string]interface{}{
+				"key":   "dummy_key",
+				"value": "http://test.example.com",
 			},
 			map[string]interface{}{
 				"value": "http://test.example.com",
@@ -44,7 +45,13 @@ func TestGetHash(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// モックデータを作成
-			hash, err := table.HashOperator.CreateHash(tc.req)
+			hash, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Key:   fmt.Sprintf("%v", tc.req["key"]),
+				Value: fmt.Sprintf("%v", tc.req["value"]),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			// APIの実行
 			res := tc.api(events.APIGatewayProxyRequest{
@@ -54,7 +61,7 @@ func TestGetHash(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -94,7 +101,7 @@ func TestGetHashErr(t *testing.T) {
 		want   map[string]interface{}
 	}{
 		{
-			"異常ケース: 404(存在しないIDの取得)",
+			"異常ケース: 404(存在しないID)",
 			GetHash,
 			404,
 			"1",
@@ -125,7 +132,7 @@ func TestGetHashErr(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -183,7 +190,7 @@ func TestGetHashs(t *testing.T) {
 			res := tc.api(events.APIGatewayProxyRequest{})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -263,7 +270,7 @@ func TestPostHashs(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -336,7 +343,7 @@ func TestPostHashsErr(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -393,8 +400,12 @@ func TestPutHash(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// モックデータを作成
 			hash, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Key:   "dummy_key",
 				Value: "test.example.com",
 			})
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			// リクエストMapをJSONに変換
 			req, err := json.Marshal(tc.req)
@@ -411,7 +422,7 @@ func TestPutHash(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -465,7 +476,7 @@ func TestPutHashErr(t *testing.T) {
 			},
 		},
 		{
-			"異常ケース: 404(存在しないIDを更新)",
+			"異常ケース: 404(存在しないID)",
 			PutHash,
 			404,
 			map[string]interface{}{
@@ -477,7 +488,7 @@ func TestPutHashErr(t *testing.T) {
 			},
 		},
 		{
-			"異常ケース: 500(不正なID)",
+			"異常ケース: 500(不正な型のID)",
 			PutHash,
 			500,
 			map[string]interface{}{
@@ -496,8 +507,12 @@ func TestPutHashErr(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// モックデータを作成
 			_, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Key:   "dummy_key",
 				Value: "test.example.com",
 			})
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			// リクエストMapをJSONに変換
 			req, err := json.Marshal(tc.req)
@@ -514,7 +529,7 @@ func TestPutHashErr(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -565,6 +580,7 @@ func TestDeleteHash(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// モックデータを作成
 			hash, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Key:   "dummy_key",
 				Value: "test.example.com",
 			})
 			if err != nil {
@@ -579,7 +595,7 @@ func TestDeleteHash(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
@@ -607,7 +623,7 @@ func TestDeleteHashErr(t *testing.T) {
 		want   map[string]interface{}
 	}{
 		{
-			"異常ケース: 404(存在しないIDを削除)",
+			"異常ケース: 404(存在しないID)",
 			DeleteHash,
 			404,
 			map[string]interface{}{
@@ -618,7 +634,7 @@ func TestDeleteHashErr(t *testing.T) {
 			},
 		},
 		{
-			"異常ケース: 500(不正なID)",
+			"異常ケース: 500(不正な型のID)",
 			DeleteHash,
 			500,
 			map[string]interface{}{
@@ -636,8 +652,12 @@ func TestDeleteHashErr(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// モックデータを作成
 			_, err := table.HashOperator.CreateHash(&domain.HashModel{
+				Key:   "dummy_key",
 				Value: "test.example.com",
 			})
+			if err != nil {
+				t.Fatal(err)
+			}
 
 			// APIの実行
 			res := tc.api(events.APIGatewayProxyRequest{
@@ -647,7 +667,7 @@ func TestDeleteHashErr(t *testing.T) {
 			})
 
 			// レスポンスStatusCodeの確認
-			if res.StatusCode != tc.status {
+			if tc.status != res.StatusCode {
 				t.Errorf("StatusCode is wrong(want=%d, actual=%d)", tc.status, res.StatusCode)
 			}
 
