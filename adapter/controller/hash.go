@@ -10,19 +10,9 @@ import (
 	"github.com/homma509/9hash/usecase"
 )
 
-// ValidatorPostSetting バリデーション設定
-var ValidatorPostSetting = []*ValidatorSetting{
-	{ArgName: "values", ValidateTags: "required"},
-}
-
 // RequestPostHashs PostHashsのリクエスト
 type RequestPostHashs struct {
 	Values []string `json:"values"`
-}
-
-// ValidatorPutSetting バリデーション設定
-var ValidatorPutSetting = []*ValidatorSetting{
-	{ArgName: "value", ValidateTags: "required"},
 }
 
 // RequestPutHash PutHashのリクエスト
@@ -32,6 +22,14 @@ type RequestPutHash struct {
 
 // GetHash Hashの取得
 func GetHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	// Paramバリデーション処理
+	errs := ValidateParams(req.PathParameters, []*ValidatorSetting{
+		{ArgName: "hash_id", ValidateTags: "required,uint"},
+	})
+	if errs != nil {
+		return Response400(errs)
+	}
+
 	// パスパラメータからHashIDを取得する
 	id, err := strconv.ParseUint(req.PathParameters["hash_id"], 10, 64)
 	if err != nil {
@@ -69,8 +67,10 @@ func GetHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse 
 
 // PostHashs 複数Hashの新規作成
 func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	// バリデーション処理
-	errs := ValidateBody(req.Body, ValidatorPostSetting)
+	// Bodyバリデーション処理
+	errs := ValidateBody(req.Body, []*ValidatorSetting{
+		{ArgName: "values", ValidateTags: "required"},
+	})
 	if errs != nil {
 		return Response400(errs)
 	}
@@ -97,8 +97,17 @@ func PostHashs(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse
 
 // PutHash Hashの更新
 func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	// バリデーション処理
-	errs := ValidateBody(req.Body, ValidatorPutSetting)
+	// Paramバリデーション処理
+	errs := ValidateParams(req.PathParameters, []*ValidatorSetting{
+		{ArgName: "hash_id", ValidateTags: "required,uint"},
+	})
+	if errs != nil {
+		return Response400(errs)
+	}
+	// Bodyバリデーション処理
+	errs = ValidateBody(req.Body, []*ValidatorSetting{
+		{ArgName: "value", ValidateTags: "required"},
+	})
 	if errs != nil {
 		return Response400(errs)
 	}
@@ -134,6 +143,14 @@ func PutHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 
 // DeleteHash Hashの削除
 func DeleteHash(req events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	// Paramバリデーション処理
+	errs := ValidateParams(req.PathParameters, []*ValidatorSetting{
+		{ArgName: "hash_id", ValidateTags: "required,uint"},
+	})
+	if errs != nil {
+		return Response400(errs)
+	}
+
 	// パスパラメータからHashIDを取得する
 	id, err := strconv.ParseUint(req.PathParameters["hash_id"], 10, 64)
 	if err != nil {

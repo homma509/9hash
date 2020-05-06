@@ -101,21 +101,36 @@ func TestGetHashErr(t *testing.T) {
 		want   map[string]interface{}
 	}{
 		{
+			"異常ケース: 400(IDの未入力)",
+			GetHash,
+			400,
+			"",
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"hash_id": "IDを入力してください。",
+				},
+			},
+		},
+		{
+			"異常ケース: 400(不正な型のID)",
+			GetHash,
+			400,
+			"dummy",
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"hash_id": "IDを数値で入力してください。",
+				},
+			},
+		},
+		{
 			"異常ケース: 404(存在しないID)",
 			GetHash,
 			404,
 			"1",
 			map[string]interface{}{
 				"message": "結果が見つかりません。",
-			},
-		},
-		{
-			"異常ケース: 500(IDの未入力)",
-			GetHash,
-			500,
-			"",
-			map[string]interface{}{
-				"message": "サーバエラーが発生しました。",
 			},
 		},
 	}
@@ -146,6 +161,13 @@ func TestGetHashErr(t *testing.T) {
 			// レスポンスメッセージの確認
 			if tc.want["message"] != resBody["message"] {
 				t.Errorf("Response Body message is not equal(want=%s, actual=%v)", tc.want["message"], resBody["message"])
+			}
+
+			// レスポンスエラーの確認
+			if _, ok := tc.want["errors"]; ok {
+				if !reflect.DeepEqual(tc.want["errors"], resBody["errors"]) {
+					t.Errorf("Response Body errors is not equal(want=%v, actual=%v)", tc.want["errors"], resBody["errors"])
+				}
 			}
 		})
 	}
@@ -476,6 +498,36 @@ func TestPutHashErr(t *testing.T) {
 			},
 		},
 		{
+			"異常ケース: 400(IDの未入力)",
+			PutHash,
+			400,
+			map[string]interface{}{
+				"hash_id": "",
+				"value":   "test_update.example.com",
+			},
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"hash_id": "IDを入力してください。",
+				},
+			},
+		},
+		{
+			"異常ケース: 400(不正な型のID)",
+			PutHash,
+			400,
+			map[string]interface{}{
+				"hash_id": "dummy",
+				"value":   "test_update.example.com",
+			},
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"hash_id": "IDを数値で入力してください。",
+				},
+			},
+		},
+		{
 			"異常ケース: 404(存在しないID)",
 			PutHash,
 			404,
@@ -485,18 +537,6 @@ func TestPutHashErr(t *testing.T) {
 			},
 			map[string]interface{}{
 				"message": "結果が見つかりません。",
-			},
-		},
-		{
-			"異常ケース: 500(不正な型のID)",
-			PutHash,
-			500,
-			map[string]interface{}{
-				"hash_id": "dummy",
-				"value":   "test_update.example.com",
-			},
-			map[string]interface{}{
-				"message": "サーバエラーが発生しました。",
 			},
 		},
 	}
@@ -623,6 +663,34 @@ func TestDeleteHashErr(t *testing.T) {
 		want   map[string]interface{}
 	}{
 		{
+			"異常ケース: 400(IDの未入力)",
+			DeleteHash,
+			400,
+			map[string]interface{}{
+				"hash_id": "",
+			},
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"hash_id": "IDを入力してください。",
+				},
+			},
+		},
+		{
+			"異常ケース: 400(不正な型のID)",
+			DeleteHash,
+			400,
+			map[string]interface{}{
+				"hash_id": "dummy",
+			},
+			map[string]interface{}{
+				"message": "入力値を確認してください。",
+				"errors": map[string]interface{}{
+					"hash_id": "IDを数値で入力してください。",
+				},
+			},
+		},
+		{
 			"異常ケース: 404(存在しないID)",
 			DeleteHash,
 			404,
@@ -631,17 +699,6 @@ func TestDeleteHashErr(t *testing.T) {
 			},
 			map[string]interface{}{
 				"message": "結果が見つかりません。",
-			},
-		},
-		{
-			"異常ケース: 500(不正な型のID)",
-			DeleteHash,
-			500,
-			map[string]interface{}{
-				"hash_id": "dummy",
-			},
-			map[string]interface{}{
-				"message": "サーバエラーが発生しました。",
 			},
 		},
 	}
@@ -681,6 +738,13 @@ func TestDeleteHashErr(t *testing.T) {
 			// レスポンスメッセージの確認
 			if tc.want["message"] != resBody["message"] {
 				t.Errorf("Response Body message is not equal(want=%s, actual=%v)", tc.want["message"], resBody["message"])
+			}
+
+			// レスポンスエラーの確認
+			if _, ok := tc.want["errors"]; ok {
+				if !reflect.DeepEqual(tc.want["errors"], resBody["errors"]) {
+					t.Errorf("Response Body errors is not equal(want=%v, actual=%v)", tc.want["errors"], resBody["errors"])
+				}
 			}
 		})
 	}

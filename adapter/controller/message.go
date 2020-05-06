@@ -7,12 +7,14 @@ import (
 )
 
 var messages = map[error]string{
-	validator.ErrZeroValue: "%sを入力してください。",
+	validator.ErrZeroValue:   "%sを入力してください。",
+	validator.ErrUnsupported: "%sを数値で入力してください。",
 }
 
 var names = map[string]string{
-	"value":  "値",
-	"values": "値",
+	"value":   "値",
+	"values":  "値",
+	"hash_id": "ID",
 }
 
 // ToMessages エラーメッセージへ変換
