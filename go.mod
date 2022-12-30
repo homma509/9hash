@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/aws-lambda-go v1.16.0
-	github.com/aws/aws-sdk-go v1.30.7
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/guregu/dynamo v1.7.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
